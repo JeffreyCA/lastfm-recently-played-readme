@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { RecentTracksResponse } from '../../models/RecentTracksResponse';
-import { BaseUrl, LastFmApiKey } from '../../settings';
 import { generateSvg } from '../../utils/SvgUtil';
 
 const defaultCount = 5;
@@ -11,6 +10,8 @@ const maxCount = 10;
 const defaultWidth = 400;
 const minWidth = 300;
 const maxWidth = 1000;
+
+const BaseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
 
 export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
     const { user } = req.query;
@@ -57,7 +58,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
                 params: {
                     user: user,
                     limit: count,
-                    api_key: LastFmApiKey,
+                    api_key: process.env.API_KEY,
                     format: 'json',
                 },
             }
