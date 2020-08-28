@@ -5,10 +5,17 @@ Show off your recent Last.fm scrobbles on your GitHub profile README. Powered by
 Just add the following into your README and set the query parameter `username` to your Last.fm username.
 
 ```md
-![JeffreyCA's scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)
 ```
 
-![JeffreyCA's scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)
+
+### Link to Last.fm profile
+```md
+[![My Last.fm](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)](https://www.last.fm/user/JeffreyCA01)
+```
+
+[![My Last.fm](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)](https://www.last.fm/user/JeffreyCA01)
 
 ### Custom track count
 To a custom number of tracks, pass the query parameter `count` and set it to the number of tracks to display.
@@ -19,10 +26,10 @@ To a custom number of tracks, pass the query parameter `count` and set it to the
 
 Example:
 ```md
-![JeffreyCA's scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1)
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1)
 ```
 
-![JeffreyCA's scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1)
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1)
 
 ### Custom card width
 To set a custom card width, pass the query parameter `width` and set it to the desired width in px.
@@ -33,14 +40,14 @@ To set a custom card width, pass the query parameter `width` and set it to the d
 
 Example:
 ```md
-![JeffreyCA's scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=600)
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=600)
 ```
 
-![JeffreyCA's scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=600)
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=600)
 
 ## Deploying own Vercel project
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import/git?s=https%3A%2F%2Fgithub.com%2FJeffreyCA%2Flastfm-recently-played-readme&env=VERCEL_URL)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import/git?s=https%3A%2F%2Fgithub.com%2FJeffreyCA%2Flastfm-recently-played-readme&env=API_KEY,VERCEL_URL)
 
 Deploy your own Vercel project using the link above. Next, you'll need to set the `API_KEY` environment variable to your Last.fm API key. You'll also need to set the `VERCEL_URL` system environment variable in the Vercel project settings.
 
