@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { RecentTracksResponse } from '../../models/RecentTracksResponse';
+import PlaceholderImg from '../../public/placeholder.webp';
 import { generateSvg } from '../../utils/SvgUtil';
 
 const defaultCount = 5;
@@ -68,12 +69,16 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         // This is needed because GitHub's Content Security Policy prohibits external images (inline allowed)
         for (const track of data.recenttracks.track) {
             const smallImg = track.image[0]['#text'];
-            const { data } = await axios.get<string>(`${BaseUrl}/api/proxy`, {
-                params: {
-                    img: smallImg,
-                },
-            });
-            track.inlineimage = data;
+            try {
+                const { data } = await axios.get<string>(`${BaseUrl}/api/proxy`, {
+                    params: {
+                        img: smallImg,
+                    },
+                });
+                track.inlineimage = data;
+            } catch {
+                track.inlineimage = PlaceholderImg;
+            }
         }
 
         res.setHeader('Cache-Control', 's-maxage=5, stale-while-revalidate');
