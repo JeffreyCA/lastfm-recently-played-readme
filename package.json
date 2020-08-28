@@ -1,5 +1,5 @@
 {
-  "name": "nextjs",
+  "name": "lastfm-recently-played-readme",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,7 +15,6 @@
     "next-images": "^1.4.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-spotify-auth": "^1.1.0",
     "styled-jsx": "^3.3.0"
   },
   "devDependencies": {
