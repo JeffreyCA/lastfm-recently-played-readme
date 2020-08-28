@@ -45,11 +45,19 @@ Example:
 Deploy your own Vercel project using the link above. Next, you'll need to set the `API_KEY` environment variable to your Last.fm API key. You'll also need to set the `VERCEL_URL` system environment variable in the Vercel project settings.
 
 ## Running locally
-1. Install Node dependencies
+1. Clone Git repo
+    ```sh
+    $ git clone https://github.com/JeffreyCA/lastfm-recently-played-readme.git
+    ```
+2. Install Node dependencies
     ```sh
     $ npm install
     ```
-2. Run development server
+3. Create `.env` file containing Last.fm API key
+    ```sh
+    $ echo "API_KEY=<Last.fm API key>" > .env
+    ```
+4. Run development server
     ```sh
     $ npm run dev
     ```
