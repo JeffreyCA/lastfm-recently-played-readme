@@ -33,10 +33,10 @@ To set a custom card width, pass the query parameter `width` and set it to the d
 
 Example:
 ```md
-![JeffreyCA's scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=1000)
+![JeffreyCA's scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=600)
 ```
 
-![JeffreyCA's scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=1000)
+![JeffreyCA's scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=600)
 
 ## Deploying own Vercel project
 
