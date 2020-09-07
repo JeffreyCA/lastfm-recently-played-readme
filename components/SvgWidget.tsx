@@ -6,11 +6,23 @@ import SvgStyles from '../styles/svg';
 import TrackList from './TrackList/TrackList';
 
 interface SvgWidgetProps {
+    /**
+     * Width in pixels.
+     */
     width: number;
+    /**
+     * Height in pixels.
+     */
     height: number;
+    /**
+     * Recent tracks response from Last.fm API.
+     */
     recentTracksResponse: RecentTracksResponse;
 }
 
+/**
+ * The main SVG widget.
+ */
 export default function SvgWidget(props: SvgWidgetProps): JSX.Element {
     const trackInfoList = props.recentTracksResponse.recenttracks.track;
     const username = props.recentTracksResponse.recenttracks['@attr'].user;

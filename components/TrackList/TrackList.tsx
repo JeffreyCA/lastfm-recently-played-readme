@@ -4,10 +4,19 @@ import TrackListHeader from './TrackListHeader';
 import TrackListItem from './TrackListItem';
 
 interface Props {
+    /**
+     * List of TrackInfo objects.
+     */
     trackInfoList: TrackInfo[];
+    /**
+     * Username.
+     */
     username: string;
 }
 
+/**
+ * Track list component.
+ */
 export default function TrackList(props: Props): JSX.Element {
     const { trackInfoList, username } = props;
     return (

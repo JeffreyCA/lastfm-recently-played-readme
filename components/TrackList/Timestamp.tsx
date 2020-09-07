@@ -6,9 +6,15 @@ import NowPlayingGif from '../../public/now_playing.gif';
 const { Text } = Typography;
 
 interface Props {
+    /**
+     * Last.fm track info.
+     */
     trackInfo: TrackInfo;
 }
 
+/**
+ * Timestamp component of a track item.
+ */
 export default function Timestamp(props: Props): JSX.Element {
     const { trackInfo } = props;
     const nowPlaying = trackInfo['@attr']?.nowplaying;

@@ -1,8 +1,8 @@
 # Last.fm Recently Played README
-Show off your recent Last.fm scrobbles on your GitHub profile README. Powered by [Vercel](https://vercel.com).
+Show your recent Last.fm scrobbles on your GitHub profile README. Powered by [Vercel](https://vercel.com).
 
 ## Getting Started
-Just add the following into your README and set the query parameter `username` to your Last.fm username.
+Just add the following into your README and set the query parameter `user` to your Last.fm username.
 
 ```md
 ![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)
@@ -60,9 +60,9 @@ Deploy your own Vercel project using the link above. Next, you'll need to set th
     ```sh
     $ npm install
     ```
-3. Create `.env` file containing Last.fm API key
+3. Create `.env` file containing the following:
     ```sh
-    $ echo "API_KEY=<Last.fm API key>" > .env
+    API_KEY=<Last.fm API key>
     ```
 4. Run development server
     ```sh

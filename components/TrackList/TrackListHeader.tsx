@@ -4,9 +4,15 @@ import LastFmIcon from '../../public/lastfm.svg';
 const { Text } = Typography;
 
 interface Props {
+    /**
+     * Username.
+     */
     username: string;
 }
 
+/**
+ * Track list header component.
+ */
 export default function TrackListHeader(props: Props): JSX.Element {
     return (
         <span>

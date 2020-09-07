@@ -5,9 +5,15 @@ import Timestamp from './Timestamp';
 const { Text } = Typography;
 
 interface Props {
+    /**
+     * Track info.
+     */
     trackInfo: TrackInfo;
 }
 
+/**
+ * Track list item component.
+ */
 export default function TrackListItem(props: Props): JSX.Element {
     const { trackInfo } = props;
     const artistName = trackInfo.artist['#text'];
