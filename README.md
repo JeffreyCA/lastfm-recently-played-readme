@@ -1,6 +1,8 @@
 # Last.fm Recently Played README
 Show your recent Last.fm scrobbles on your GitHub profile README. Powered by [Vercel](https://vercel.com).
 
+> Check out [spotify-recently-played-readme](https://github.com/JeffreyCA/spotify-recently-played-readme) for a similar integration for Spotify.
+
 ## Getting Started
 Just add the following into your README and set the query parameter `user` to your Last.fm username.
 
