@@ -25,7 +25,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 
         // Set cache for a week
         res.setHeader('Cache-Control', 'max-age=86400, immutable');
-        res.send(`data:image/png; base64, ${base64}`);
+        res.send(`data:image/png;base64,${base64}`);
     } catch (e) {
         const data = e?.response?.data;
         res.statusCode = 400;
