@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "antd": "^4.9.3",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "luxon": "^1.25.0",
     "next": "9.5.4",
     "next-images": "^1.6.2",
