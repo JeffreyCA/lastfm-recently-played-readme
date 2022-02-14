@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { LovedTrackStyle, LovedTrackOptions } from '../../models/LovedTrackOptions';
 import { RecentTracksResponse } from '../../models/RecentTracksResponse';
 import PlaceholderImg from '../../public/placeholder.webp';
 import { generateSvg } from '../../utils/SvgUtil';
@@ -11,6 +12,8 @@ const maxCount = 10;
 const defaultWidth = 400;
 const minWidth = 300;
 const maxWidth = 1000;
+
+const defaultLovedStyle = LovedTrackStyle.RightOfAlbumArt;
 
 const BaseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
 
@@ -52,12 +55,34 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         return;
     }
 
+    const lovedQuery: string | string[] | undefined = req.query['loved'];
+    const showLoved = lovedQuery === 'true';
+
+    const lovedStyleQuery: string | string[] | undefined = req.query['loved_style'];
+    let lovedStyle: LovedTrackStyle = defaultLovedStyle;
+
+    if (typeof lovedStyleQuery === 'string') {
+        lovedStyle = parseInt(lovedStyleQuery);
+    }
+
+    if (!lovedStyle || Array.isArray(lovedStyle) || !Object.values(LovedTrackStyle).includes(lovedStyle)) {
+        res.statusCode = 400;
+        res.json({ error: `Invalid 'lovedStyle' parameter` });
+        return;
+    }
+
+    const lovedTrackOptions: LovedTrackOptions = {
+        show: showLoved,
+        style: lovedStyle,
+    };
+
     try {
         const { data } = await axios.get<RecentTracksResponse>(
             'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks',
             {
                 params: {
                     user: user,
+                    extended: 1,
                     limit: count,
                     api_key: process.env.API_KEY,
                     format: 'json',
@@ -84,7 +109,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
         res.setHeader('Content-Type', 'image/svg+xml');
         res.statusCode = 200;
-        res.send(generateSvg(data, width));
+        res.send(generateSvg(data, width, lovedTrackOptions));
     } catch (e) {
         const data = e?.response?.data;
         res.statusCode = 400;

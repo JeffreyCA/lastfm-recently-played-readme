@@ -23,6 +23,12 @@ svg {
 .lastfm-user:hover {
     color: #f5222d;
 }
+.ant-list-item-meta-title>div>a {
+    color: hsla(0,0%,100%,.85);
+    -webkit-transition: all .3s;
+    -webkit-transition: all .3s;
+    transition: all .3s;
+}
 a.a-lastfm:hover {
     color: #f5222d !important;
 }
@@ -53,5 +59,11 @@ a.a-lastfm:hover {
 }
 .timestamp {
     font-size: 0.7rem;
-    margin-left: 5px;
-}`;
+    margin-left: 4px;
+}
+.inline-heart {
+    margin-bottom: -1px;
+    min-width: 12px;
+    min-height: 12px;
+}
+`;
