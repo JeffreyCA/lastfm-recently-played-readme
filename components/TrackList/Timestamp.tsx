@@ -54,7 +54,7 @@ export default function Timestamp(props: Props): JSX.Element {
 
     let mainContent = (
         <>
-            {nowPlaying && <Image preview={false} width={16} src={NowPlayingGif} />}
+            {nowPlaying && <Image preview={false} width={12} src={NowPlayingGif} />}
             <Text className="timestamp" type="secondary" title={timestampTitle}>
                 {timestampText}
             </Text>
