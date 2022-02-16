@@ -54,10 +54,10 @@ Set the `loved` parameter to `true` to show a heart indicator next to your loved
 
 Example:
 ```md
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&loves=true)
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&loved=true)
 ```
 
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&loves=true)
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&loved=true)
 
 **Further customization:**
 
