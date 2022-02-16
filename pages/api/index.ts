@@ -110,7 +110,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         res.setHeader('Content-Type', 'image/svg+xml');
         res.statusCode = 200;
         res.send(generateSvg(data, width, lovedTrackOptions));
-    } catch (e) {
+    } catch (e: any) {
         const data = e?.response?.data;
         res.statusCode = 400;
         if (data) {
