@@ -65,19 +65,9 @@ You can set the `loved_style` parameter to `1`, `2`, `3`, or `4` to customize th
 
 > Default: `1`
 
-Example:
-<!-- 
-| Style     | Description | Test Text     |
-| :----:    |    :----:   |  :----: |
-| Style 1   | `![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1&loves=true&loved_style=1)` | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1&loves=true&loved_style=1) |
-| Style 2   | `![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1&loves=true&loved_style=2)` | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1&loves=true&loved_style=2) |
-| Style 3   | `![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1&loves=true&loved_style=3)` | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1&loves=true&loved_style=3) |
-| Style 4   | `![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1&loves=true&loved_style=4)` | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1&loves=true&loved_style=4) |
--->
-
 | Style 1 | Style 2 | Style 3 | Style 4 |
 | :----:    |    :----:   |  :----: | :----: |
-| ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=1&loves=true&loved_style=1) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=1&loves=true&loved_style=2) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=1&loves=true&loved_style=3) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=1&loves=true&loved_style=4) |
+| ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=1) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=2) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=3) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=4) |
 
 ## Deploying own Vercel project
 
