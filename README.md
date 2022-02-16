@@ -47,6 +47,28 @@ Example:
 
 ![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=600)
 
+### Show loved tracks
+Set the `loved` parameter to `true` to show a heart indicator next to your loved tracks.
+
+> Default: `false`
+
+Example:
+```md
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&loved=true)
+```
+
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&loved=true)
+
+**Further customization:**
+
+You can set the `loved_style` parameter to `1`, `2`, `3`, or `4` to customize the indicator placement.
+
+> Default: `1`
+
+| Style 1 | Style 2 | Style 3 | Style 4 |
+| :----:    |    :----:   |  :----: | :----: |
+| ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=1) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=2) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=3) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=4) |
+
 ## Deploying own Vercel project
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import/git?s=https%3A%2F%2Fgithub.com%2FJeffreyCA%2Flastfm-recently-played-readme&env=API_KEY,VERCEL_URL)

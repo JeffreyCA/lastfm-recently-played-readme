@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+import { LovedTrackOptions } from '../models/LovedTrackOptions';
 import { RecentTracksResponse } from '../models/RecentTracksResponse';
 import AntStyles from '../styles/antd';
 import SvgStyles from '../styles/svg';
@@ -18,6 +19,10 @@ interface SvgWidgetProps {
      * Recent tracks response from Last.fm API.
      */
     recentTracksResponse: RecentTracksResponse;
+    /**
+     * Options for showing loved tracks.
+     */
+    lovedTrackOptions: LovedTrackOptions;
 }
 
 /**
@@ -26,7 +31,7 @@ interface SvgWidgetProps {
 export default function SvgWidget(props: SvgWidgetProps): JSX.Element {
     const trackInfoList = props.recentTracksResponse.recenttracks.track;
     const username = props.recentTracksResponse.recenttracks['@attr'].user;
-    const { width, height } = props;
+    const { width, height, lovedTrackOptions } = props;
 
     return (
         <>
@@ -50,7 +55,11 @@ export default function SvgWidget(props: SvgWidgetProps): JSX.Element {
                 />
                 <foreignObject x="0" y="0" width={width} height={height}>
                     <div xmlns="http://www.w3.org/1999/xhtml" style={{ color: 'white' }}>
-                        <TrackList trackInfoList={trackInfoList} username={username} />
+                        <TrackList
+                            trackInfoList={trackInfoList}
+                            username={username}
+                            lovedTrackOptions={lovedTrackOptions}
+                        />
                     </div>
                 </foreignObject>
             </g>
