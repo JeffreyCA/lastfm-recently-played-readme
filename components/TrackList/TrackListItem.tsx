@@ -23,7 +23,7 @@ interface Props {
     lovedTrackOptions: LovedTrackOptions;
 }
 
-const avatarStyleLoved = { display: 'flex', alignItems: 'center', gap: '6px', marginRight: '-10px' };
+const avatarStyleLoved = { display: 'flex', alignItems: 'center', gap: '6px', marginRight: '-6px' };
 const avatarStyle = { display: 'flex', alignItems: 'center' };
 
 const titleStyleLoved = { display: 'flex', alignItems: 'center', gap: '4px' };

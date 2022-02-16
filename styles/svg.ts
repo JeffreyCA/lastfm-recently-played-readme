@@ -46,6 +46,7 @@ a.a-lastfm:hover {
 }
 .ant-list-item-meta-avatar {
     align-self: center;
+    margin-right: 12px !important;
 }
 .ant-list-item-meta-title {
     font-size: 0.8rem;
