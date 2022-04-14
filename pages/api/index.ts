@@ -90,6 +90,9 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
             }
         );
 
+        // Trim array as API may return more than 'count'
+        data.recenttracks.track = data.recenttracks.track.slice(0, count);
+
         // Set base64-encoded cover art images by routing through /api/proxy endpoint
         // This is needed because GitHub's Content Security Policy prohibits external images (inline allowed)
         for (const track of data.recenttracks.track) {
