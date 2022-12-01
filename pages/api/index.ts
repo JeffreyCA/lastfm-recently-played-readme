@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { GetTrackInfoResponse, TrackItem } from '../../models/GetTrackInfoResponse';
 import { LovedTrackStyle, LovedTrackOptions } from '../../models/LovedTrackOptions';
 import { RecentTracksResponse } from '../../models/RecentTracksResponse';
+import { TrackInfo } from '../../models/TrackInfo';
 import PlaceholderImg from '../../public/placeholder.webp';
 import { generateSvg } from '../../utils/SvgUtil';
 
@@ -16,6 +18,59 @@ const maxWidth = 1000;
 const defaultLovedStyle = LovedTrackStyle.RightOfAlbumArt;
 
 const BaseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+
+async function getTrackInfo(artist: string, track: string): Promise<TrackItem | null> {
+    try {
+        const { data } = await axios.get<GetTrackInfoResponse>(
+            'http://ws.audioscrobbler.com/2.0/?method=track.getInfo',
+            {
+                params: {
+                    artist: artist,
+                    track: track,
+                    api_key: process.env.API_KEY,
+                    format: 'json',
+                },
+            }
+        );
+        return data.track;
+    } catch (e: unknown) {
+        return null;
+    }
+}
+
+/**
+ * Get track artwork url.
+ *
+ * If TrackInfo has the appropriate artwork, return it.
+ * Otherwise, it retrieves information from the track.getInfo endpoint and returns the album artwork if it has it.
+ * Otherwise it returns null.
+ *
+ * @param trackInfo TrackInfo
+ * @returns Track artwork url or null
+ */
+async function getImageUrl(trackInfo: TrackInfo): Promise<string | null> {
+    const smallImgFromTrackInfo = trackInfo.image[0]['#text'];
+
+    // smallImgFromTrackInfo is may be an empty string.
+    if (smallImgFromTrackInfo) {
+        return smallImgFromTrackInfo; // Use small image if available
+    }
+
+    // If small image is not available, try to get from info endpoint.
+    const trackItem = await getTrackInfo(trackInfo.artist.name, trackInfo.name);
+    if (trackItem) {
+        if (!trackItem.album) {
+            // If album is not available.
+            return null;
+        }
+        const smallImgFromInfo = trackItem.album.image[0]['#text'];
+        if (smallImgFromInfo) {
+            return smallImgFromInfo;
+        }
+    }
+
+    return null;
+}
 
 export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
     const { user } = req.query;
@@ -96,15 +151,20 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         // Set base64-encoded cover art images by routing through /api/proxy endpoint
         // This is needed because GitHub's Content Security Policy prohibits external images (inline allowed)
         for (const track of data.recenttracks.track) {
-            const smallImg = track.image[0]['#text'];
-            try {
-                const { data } = await axios.get<string>(`${BaseUrl}/api/proxy`, {
-                    params: {
-                        img: smallImg,
-                    },
-                });
-                track.inlineimage = data;
-            } catch {
+            const smallImg = await getImageUrl(track);
+            if (smallImg) {
+                try {
+                    console.log(`Fetching image from ${smallImg}`);
+                    const { data } = await axios.get<string>(`${BaseUrl}/api/proxy`, {
+                        params: {
+                            img: smallImg,
+                        },
+                    });
+                    track.inlineimage = data;
+                } catch {
+                    track.inlineimage = PlaceholderImg;
+                }
+            } else {
                 track.inlineimage = PlaceholderImg;
             }
         }
