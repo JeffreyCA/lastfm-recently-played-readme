@@ -1,7 +1,5 @@
 import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
-import fs from 'fs';
-import path from 'path';
 
 const acceptedPrefix = 'https://lastfm.freetls.fastly.net/i/';
 
@@ -19,27 +17,11 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         return;
     }
 
-    const filename = img.split('/').pop();
-    const cachePath = `./cache/${filename}.base64`;
-    if (!fs.existsSync(path.dirname(cachePath))) {
-        fs.mkdirSync(path.dirname(cachePath), { recursive: true });
-    }
-    if (fs.existsSync(cachePath)) {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Cache-Control', 's-maxage=31536000, immutable');
-        res.send('data:image/png;base64,' + fs.readFileSync(cachePath));
-        return;
-    }
-
     try {
         const { data } = await axios.get<string>(img, {
             responseType: 'arraybuffer',
         });
         const base64 = Buffer.from(data, 'binary').toString('base64');
-
-        // Cache image
-        fs.writeFileSync(cachePath, base64);
 
         // Set cache for a week
         res.setHeader('Cache-Control', 'max-age=86400, immutable');
