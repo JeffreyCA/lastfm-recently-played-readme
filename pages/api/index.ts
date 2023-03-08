@@ -17,7 +17,9 @@ const maxWidth = 1000;
 
 const defaultLovedStyle = LovedTrackStyle.RightOfAlbumArt;
 
-const BaseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+const BaseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.BASE_URL || 'http://localhost:3000';
 
 async function getTrackInfo(artist: string, track: string): Promise<TrackItem | null> {
     try {
@@ -161,7 +163,8 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
                         },
                     });
                     track.inlineimage = data;
-                } catch {
+                } catch (e) {
+                    console.error(e);
                     track.inlineimage = PlaceholderImg;
                 }
             } else {

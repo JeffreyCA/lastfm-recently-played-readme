@@ -1,0 +1,41 @@
+# 任意のレジストリに Docker image を公開orビルドする。
+# プルリクの作成・更新時に動作する。
+
+name: Docker
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+    types:
+      - opened
+      - synchronize
+    paths:
+      - .github/workflows/docker.yml
+  pull_request_target:
+    branches:
+      - main
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.merged == true && github.base_ref || github.event.pull_request.head.sha }}
+
+jobs:
+  docker-ci:
+    name: Docker CI
+    uses: book000/templates/.github/workflows/reusable-docker.yml@master
+    with:
+      targets: >-
+        [
+          { imageName: "book000/lastfm-recently-played-readme", context: ".", file: "Dockerfile", packageName: "lastfm-recently-played-readme" }
+        ]
+      platforms: linux/amd64
+    secrets:
+      DOCKER_USERNAME: ${{ github.actor }}
+      DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
