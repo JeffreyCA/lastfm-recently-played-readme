@@ -4,6 +4,7 @@ import { LovedTrackStyle, LovedTrackOptions } from '../../models/LovedTrackOptio
 import { RecentTracksResponse } from '../../models/RecentTracksResponse';
 import PlaceholderImg from '../../public/placeholder.webp';
 import { generateSvg } from '../../utils/SvgUtil';
+import { HeaderSize, StyleOptions } from '../../models/StyleOptions';
 
 const defaultCount = 5;
 const minCount = 1;
@@ -76,6 +77,23 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         style: lovedStyle,
     };
 
+    const availableHeaderSizes = ['none', 'compact', 'normal'];
+    const headerSize: string | string[] | undefined = req.query['header_size'] || 'normal';
+    if (Array.isArray(headerSize) || !availableHeaderSizes.includes(headerSize)) {
+        res.statusCode = 400;
+        res.json({ error: `Invalid 'header_size' parameter. Should be one of ${availableHeaderSizes}.` });
+    }
+
+    const borderRadius: string | string[] | undefined = req.query['border_radius'] || '10';
+    if (Array.isArray(borderRadius) || parseFloat(borderRadius) < 0 || parseFloat(borderRadius) > 100) {
+        res.statusCode = 400;
+        res.json({ error: `Invalid 'border_radius' parameter. Should be a number between 0 and 100.` });
+    }
+    const styleOptions: StyleOptions = {
+        headerSize: headerSize as HeaderSize,
+        borderRadius: parseFloat(borderRadius as string),
+    };
+
     try {
         const { data } = await axios.get<RecentTracksResponse>(
             'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks',
@@ -112,7 +130,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
         res.setHeader('Content-Type', 'image/svg+xml');
         res.statusCode = 200;
-        res.send(generateSvg(data, width, lovedTrackOptions));
+        res.send(generateSvg(data, width, lovedTrackOptions, styleOptions));
     } catch (e: any) {
         const data = e?.response?.data;
         res.statusCode = 400;

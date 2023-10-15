@@ -10,6 +10,13 @@ svg {
     vertical-align: middle;
     font-size: 16px;
 }
+.lastfm-title-compact {
+    vertical-align: middle;
+    font-size: 10px;
+}
+.svg-widget.compact .ant-list-header {
+    padding: 3px 16px;
+}
 .lastfm-icon {
     margin-right: 10px;
 }
