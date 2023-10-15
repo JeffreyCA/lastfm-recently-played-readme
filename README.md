@@ -12,58 +12,64 @@ Just add the following into your README and set the query parameter `user` to yo
 
 ![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)
 
-### Link to Last.fm profile
+To add link to your last.fm profile, wrap the image in a link tag:
+
 ```md
 [![My Last.fm](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)](https://www.last.fm/user/JeffreyCA01)
 ```
 
 [![My Last.fm](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)](https://www.last.fm/user/JeffreyCA01)
 
-### Custom track count
-To a custom number of tracks, pass the query parameter `count` and set it to the number of tracks to display.
 
-> Default: `5`  
-> Min: `1`  
-> Max: `10`
+## Customization
 
-Example:
+### Parameters
+
+You can customize your list.fm status by adding query parameters after the url. Here is a list of available parameters.
+
+| Parameter | Description | Type | Default | Valid Values |
+| --- | --- | --- | --- | --- |
+| `count` | Number of recent tracks to display | number | 5 | 1 - 10 |
+| `width` | Width of the card in pixels | number | 400 | 300-1000 |
+| `loved` | Show a heart indicator for loved tracks | boolean | false | true, false |
+| `header_size` | Adjust the size of the header or hide it | string | normal | none, compact, normal |
+| `border_radius` | Adjust the radius of the card | number | 10 | 0 - 100 |
+| `loved_style` | Customize the indicator placement for loved tracks | number | 1 | 1, 2, 3, 4 |
+
+### Examples
+
+
+#### Customizing Track Count
+
 ```md
 ![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1)
 ```
 
 ![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1)
 
-### Custom card width
-To set a custom card width, pass the query parameter `width` and set it to the desired width in px.
+#### Customizing card width
 
-> Default: `400`  
-> Min: `300`  
-> Max: `1000`
-
-Example:
 ```md
 ![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=600)
 ```
 
 ![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=600)
 
-### Show loved tracks
-Set the `loved` parameter to `true` to show a heart indicator next to your loved tracks.
+#### Show loved tracks
 
-> Default: `false`
-
-Example:
 ```md
 ![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&loved=true)
 ```
 
 ![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&loved=true)
 
-**Further customization:**
+#### Header Sizes
 
-You can set the `loved_style` parameter to `1`, `2`, `3`, or `4` to customize the indicator placement.
+| `none` | `compact` | `normal` |
+| :----:    |    :----:   |  :----: |
+| ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&header_size=none) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&header_size=compact) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&header_size=normal) |
 
-> Default: `1`
+#### Loved Style
 
 | Style 1 | Style 2 | Style 3 | Style 4 |
 | :----:    |    :----:   |  :----: | :----: |
