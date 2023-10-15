@@ -3,6 +3,7 @@ import { LovedTrackOptions } from '../../models/LovedTrackOptions';
 import { TrackInfo } from '../../models/TrackInfo';
 import TrackListHeader from './TrackListHeader';
 import TrackListItem from './TrackListItem';
+import { StyleOptions } from '../../models/StyleOptions';
 
 interface Props {
     /**
@@ -17,19 +18,27 @@ interface Props {
      * Options for showing loved tracks.
      */
     lovedTrackOptions: LovedTrackOptions;
+    /**
+     * Options for styling.
+     */
+    styleOptions: StyleOptions;
 }
 
 /**
  * Track list component.
  */
 export default function TrackList(props: Props): JSX.Element {
-    const { trackInfoList, username, lovedTrackOptions } = props;
+    const { trackInfoList, username, lovedTrackOptions, styleOptions } = props;
     const anyLovesInList = trackInfoList.some((trackInfo) => trackInfo.loved === '1');
 
     return (
         <List
             size="small"
-            header={<TrackListHeader username={username} />}
+            header={
+                styleOptions.headerSize !== 'none' && (
+                    <TrackListHeader username={username} size={styleOptions.headerSize} />
+                )
+            }
             bordered
             dataSource={trackInfoList}
             renderItem={(trackInfo) => (

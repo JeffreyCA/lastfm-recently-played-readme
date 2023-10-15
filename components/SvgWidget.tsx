@@ -2,6 +2,7 @@
 // @ts-nocheck
 import { LovedTrackOptions } from '../models/LovedTrackOptions';
 import { RecentTracksResponse } from '../models/RecentTracksResponse';
+import { StyleOptions } from '../models/StyleOptions';
 import AntStyles from '../styles/antd';
 import SvgStyles from '../styles/svg';
 import TrackList from './TrackList/TrackList';
@@ -23,6 +24,10 @@ interface SvgWidgetProps {
      * Options for showing loved tracks.
      */
     lovedTrackOptions: LovedTrackOptions;
+    /**
+     * Options for styling the SVG.
+     */
+    styleOptions: StyleOptions;
 }
 
 /**
@@ -31,7 +36,7 @@ interface SvgWidgetProps {
 export default function SvgWidget(props: SvgWidgetProps): JSX.Element {
     const trackInfoList = props.recentTracksResponse.recenttracks.track;
     const username = props.recentTracksResponse.recenttracks['@attr'].user;
-    const { width, height, lovedTrackOptions } = props;
+    const { width, height, lovedTrackOptions, styleOptions } = props;
 
     return (
         <>
@@ -46,7 +51,7 @@ export default function SvgWidget(props: SvgWidgetProps): JSX.Element {
                     data-testid="card-bg"
                     x="0"
                     y="0"
-                    rx="10"
+                    rx={styleOptions.borderRadius}
                     height="100%"
                     stroke="#212121"
                     width={width}
@@ -54,11 +59,15 @@ export default function SvgWidget(props: SvgWidgetProps): JSX.Element {
                     strokeOpacity="1"
                 />
                 <foreignObject x="0" y="0" width={width} height={height}>
-                    <div xmlns="http://www.w3.org/1999/xhtml" style={{ color: 'white' }}>
+                    <div
+                        xmlns="http://www.w3.org/1999/xhtml"
+                        className={`svg-widget ${styleOptions.headerSize}`}
+                        style={{ color: 'white' }}>
                         <TrackList
                             trackInfoList={trackInfoList}
                             username={username}
                             lovedTrackOptions={lovedTrackOptions}
+                            styleOptions={styleOptions}
                         />
                     </div>
                 </foreignObject>
