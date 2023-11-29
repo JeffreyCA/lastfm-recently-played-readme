@@ -11,11 +11,15 @@ svg {
     font-size: 16px;
 }
 .lastfm-title-compact {
-    vertical-align: middle;
+    display: block;
     font-size: 10px;
 }
 .svg-widget.compact .ant-list-header {
     padding: 3px 16px;
+}
+.lastfm-footer {
+    padding: 5px 16px;
+    border-top: 1px solid #303030;
 }
 .lastfm-icon {
     margin-right: 10px;
@@ -30,6 +34,52 @@ svg {
 .lastfm-user:hover {
     color: #f5222d;
 }
+.lastfm-profile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 5px;
+}
+.lastfm-stats > div {
+    display: flex;
+    flex-direction: column;
+    row-gap:5px;
+}
+.lastfm-stats.compact > div {
+    display: flex;
+    flex-direction: row;
+    column-gap: 3px;
+    align-items: baseline;
+}
+.lastfm-stats > div > span:nth-child(2) {
+    text-transform: uppercase;
+    color: #ba0201;
+    font-size: 8px;
+    margin-top: -10px;
+}
+.lastfm-stats.compact > div > span:nth-child(2) {
+    text-transform: uppercase;
+    color: hsla(0,0%,100%,.45);
+    font-size: 8px;
+    margin-top: -4px;
+}
+
+.lastfm-stats > div > span:nth-child(1) {
+    font-size: 12px;
+}
+.lastfm-stats.compact > div > span:nth-child(1) {
+    font-size: 12px;
+}
+.lastfm-stats > div > span {
+    margin: 0;
+}
+.lastfm-stats {
+    display: flex;
+    flex-direction: row;
+    row-gap: 10px;
+    column-gap: 10px;
+}
+
 .ant-list-item-meta-title>div>a {
     color: hsla(0,0%,100%,.85);
     -webkit-transition: all .3s;

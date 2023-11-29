@@ -28,6 +28,10 @@ interface SvgWidgetProps {
      * Options for styling the SVG.
      */
     styleOptions: StyleOptions;
+    /**
+     * User Info.
+     */
+    userInfo: UserInfo;
 }
 
 /**
@@ -36,7 +40,7 @@ interface SvgWidgetProps {
 export default function SvgWidget(props: SvgWidgetProps): JSX.Element {
     const trackInfoList = props.recentTracksResponse.recenttracks.track;
     const username = props.recentTracksResponse.recenttracks['@attr'].user;
-    const { width, height, lovedTrackOptions, styleOptions } = props;
+    const { width, height, lovedTrackOptions, styleOptions, userInfo } = props;
 
     return (
         <>
@@ -53,12 +57,15 @@ export default function SvgWidget(props: SvgWidgetProps): JSX.Element {
                     y="0"
                     rx={styleOptions.borderRadius}
                     height="100%"
-                    stroke="#212121"
+                    stroke="none"
                     width={width}
-                    fill="#212121"
+                    fill={styleOptions.bgColor}
                     strokeOpacity="1"
                 />
-                <foreignObject x="0" y="0" width={width} height={height}>
+                <foreignObject x="0" y="0" width={width} height={height}
+                style={{
+                    
+                }}>
                     <div
                         xmlns="http://www.w3.org/1999/xhtml"
                         className={`svg-widget ${styleOptions.headerSize}`}
@@ -68,6 +75,7 @@ export default function SvgWidget(props: SvgWidgetProps): JSX.Element {
                             username={username}
                             lovedTrackOptions={lovedTrackOptions}
                             styleOptions={styleOptions}
+                            userInfo={userInfo}
                         />
                     </div>
                 </foreignObject>

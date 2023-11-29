@@ -1,10 +1,11 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { LovedTrackStyle, LovedTrackOptions } from '../../models/LovedTrackOptions';
 import { RecentTracksResponse } from '../../models/RecentTracksResponse';
 import PlaceholderImg from '../../public/placeholder.webp';
 import { generateSvg } from '../../utils/SvgUtil';
-import { HeaderSize, StyleOptions } from '../../models/StyleOptions';
+import { FooterSize, HeaderSize, StyleOptions } from '../../models/StyleOptions';
+import { UserInfoResponse } from '../../models/UserInfoResponse';
 
 const defaultCount = 5;
 const minCount = 1;
@@ -15,6 +16,8 @@ const minWidth = 300;
 const maxWidth = 1000;
 
 const defaultLovedStyle = LovedTrackStyle.RightOfAlbumArt;
+
+const defaultStatsVisibility = false;
 
 const BaseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
 
@@ -28,6 +31,14 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         res.statusCode = 400;
         res.json({ error: `Invalid 'user' parameter` });
         return;
+    }
+
+    // Parse 'stats' query parameter.
+    const statsQuery: string | string[] | undefined = req.query['stats'];
+    let stats = defaultStatsVisibility;
+
+    if (typeof statsQuery === 'string') {
+        stats = statsQuery === 'true';
     }
 
     // Parse 'width' query parameter
@@ -84,58 +95,105 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         res.json({ error: `Invalid 'header_size' parameter. Should be one of ${availableHeaderSizes}.` });
     }
 
+    const availableFooterSizes = ['none', 'compact', 'normal'];
+    const footerSize: string | string[] | undefined = req.query['footer_size'] || 'none';
+    if (Array.isArray(footerSize) || !availableFooterSizes.includes(footerSize)) {
+        res.statusCode = 400;
+        res.json({ error: `Invalid 'footer_size' parameter. Should be one of ${availableFooterSizes}.` });
+    }
+
     const borderRadius: string | string[] | undefined = req.query['border_radius'] || '10';
     if (Array.isArray(borderRadius) || parseFloat(borderRadius) < 0 || parseFloat(borderRadius) > 100) {
         res.statusCode = 400;
         res.json({ error: `Invalid 'border_radius' parameter. Should be a number between 0 and 100.` });
     }
+
+    const bgColor: string | string[] | undefined = req.query['bg_color'] || '212121';
+    if (Array.isArray(bgColor) || bgColor.length < 0 || bgColor.length > 8 || bgColor.startsWith('#')) {
+        res.statusCode = 400;
+        res.json({ error: `Invalid 'bg_color' parameter. Should be a hexadecimal RGB or RGBA code with no leading \'#\' symbol.` });
+    }
+
+    const displayUsername: string | string[] | undefined = req.query['show_user'];
+    const displayStats: string | string[] | undefined = req.query['stats'];
+    const statsInFooter: string | string[] | undefined = req.query['footer_stats'] || 'false';
+
     const styleOptions: StyleOptions = {
         headerSize: headerSize as HeaderSize,
+        footerSize: footerSize as FooterSize,
         borderRadius: parseFloat(borderRadius as string),
+        bgColor: '#'+bgColor,
+        displayUsername: displayUsername === 'true',
+        displayStats: displayStats === 'true',
+        statsInFooter: statsInFooter === 'true',
     };
 
     try {
-        const { data } = await axios.get<RecentTracksResponse>(
-            'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks',
-            {
-                params: {
-                    user: user,
-                    extended: 1,
-                    limit: count,
-                    api_key: process.env.API_KEY,
-                    format: 'json',
-                },
-            }
-        );
+        var apiCalls : Promise<AxiosResponse<any,any>>[] = [
+            axios.get<RecentTracksResponse>(
+                'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks',
+                {
+                    params: {
+                        user: user,
+                        extended: 1,
+                        limit: count,
+                        api_key: process.env.API_KEY,
+                        format: 'json',
+                    },
+                }
+            ),
+        ]
 
+        // Only make the second API call if userInfo will actually be shown.
+        if (displayStats || displayUsername || footerSize !== 'none') apiCalls.push(
+            axios.get<UserInfoResponse>(
+                'http://ws.audioscrobbler.com/2.0/?method=user.getinfo',
+                {
+                    params: {
+                        user: user,
+                        api_key: process.env.API_KEY,
+                        format: 'json',
+                    },
+                }
+            ),
+        )
+        const datas = await Promise.all(apiCalls);
+
+        const trackData = datas[0].data;
+        let userData;
+        if(datas[1] !== undefined) userData = datas[1].data;
+        
+       
         // Trim array as API may return more than 'count'
-        data.recenttracks.track = data.recenttracks.track.slice(0, count);
+        trackData.recenttracks.track = trackData.recenttracks.track.slice(0, count);
 
         // Set base64-encoded cover art images by routing through /api/proxy endpoint
         // This is needed because GitHub's Content Security Policy prohibits external images (inline allowed)
-        for (const track of data.recenttracks.track) {
-            const smallImg = track.image[0]['#text'];
+        let objs : any[] = [...trackData.recenttracks.track];
+        if(userData !== undefined) objs.push(userData.user);
+        for (const obj of objs) {
+            const smallImg = obj.image[0]['#text'];
             try {
                 const { data } = await axios.get<string>(`${BaseUrl}/api/proxy`, {
                     params: {
                         img: smallImg,
                     },
                 });
-                track.inlineimage = data;
+                obj.inlineimage = data;
             } catch {
-                track.inlineimage = PlaceholderImg;
+                obj.inlineimage = PlaceholderImg;
             }
         }
-
+        
         res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
         res.setHeader('Content-Type', 'image/svg+xml');
         res.statusCode = 200;
-        res.send(generateSvg(data, width, lovedTrackOptions, styleOptions));
+        res.send(generateSvg(trackData, width, lovedTrackOptions, styleOptions, userData));
     } catch (e: any) {
-        const data = e?.response?.data;
+        const trackData = e?.response?.trackData;
         res.statusCode = 400;
-        if (data) {
-            res.json({ error: data.message });
+        if (trackData) {
+            res.json({ error: trackData.message });
         } else {
             res.json({ error: e.toString() });
         }

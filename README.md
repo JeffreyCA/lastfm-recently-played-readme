@@ -32,9 +32,14 @@ You can customize your list.fm status by adding query parameters after the url. 
 | `count` | Number of recent tracks to display | number | 5 | 1 - 10 |
 | `width` | Width of the card in pixels | number | 400 | 300-1000 |
 | `loved` | Show a heart indicator for loved tracks | boolean | false | true, false |
+| `stats` | Show your scrobbles, arist count, and track count | boolean | false | true, false |
+| `show_user` | Show your username and profile picture | boolean | false | true, false |
+| `footer_stats` | Move your stats and user information to the footer | boolean | false | true, false |
 | `header_size` | Adjust the size of the header or hide it | string | normal | none, compact, normal |
+| `footer_size` | Adjust the size of the footer or hide it | string | none | none, compact, normal |
 | `border_radius` | Adjust the radius of the card | number | 10 | 0 - 100 |
 | `loved_style` | Customize the indicator placement for loved tracks | number | 1 | 1, 2, 3, 4 |
+| `bg_color` | Customize the background color of the card. Supports alpha transparency. | string | 212121 | RGB/A hexadecimal |
 
 ### Examples
 
@@ -63,17 +68,55 @@ You can customize your list.fm status by adding query parameters after the url. 
 
 ![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&loved=true)
 
+#### Show user stats
+
+```md
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&stats=true)
+```
+
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&stats=true)
+
+#### Show user profile
+
+```md
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&show_user=true)
+```
+
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&show_user=true)
+
+#### Show stats in footer
+
+```md
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&stats=true&show_user=true&footer_stats=true)
+```
+
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&stats=true&show_user=true&footer_stats=true)
+
 #### Header Sizes
 
 | `none` | `compact` | `normal` |
 | :----:    |    :----:   |  :----: |
 | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&header_size=none) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&header_size=compact) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&header_size=normal) |
 
+#### Footer Sizes
+
+| `none` | `compact` | `normal` |
+| :----:    |    :----:   |  :----: |
+| ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&footer_size=none) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&footer_size=compact) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&footer_size=normal) |
+
 #### Loved Style
 
 | Style 1 | Style 2 | Style 3 | Style 4 |
 | :----:    |    :----:   |  :----: | :----: |
 | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=1) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=2) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=3) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=4) |
+
+#### Change Background Color
+
+```md
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&bg_color=000000)
+```
+
+![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&bg_color=000000)
 
 ## Deploying own Vercel project
 
