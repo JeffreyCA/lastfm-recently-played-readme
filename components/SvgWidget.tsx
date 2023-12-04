@@ -62,14 +62,12 @@ export default function SvgWidget(props: SvgWidgetProps): JSX.Element {
                     fill={styleOptions.bgColor}
                     strokeOpacity="1"
                 />
-                <foreignObject x="0" y="0" width={width} height={height}
-                style={{
-                    
-                }}>
+                <foreignObject x="0" y="0" width={width} height={height} style={{}}>
                     <div
                         xmlns="http://www.w3.org/1999/xhtml"
-                        className={`svg-widget ${styleOptions.headerSize}`}
-                        style={{ color: 'white' }}>
+                        className={`svg-widget ${styleOptions.headerStyle}`}
+                        style={{ color: 'white' }}
+                    >
                         <TrackList
                             trackInfoList={trackInfoList}
                             username={username}

@@ -4,7 +4,7 @@ import { LovedTrackStyle, LovedTrackOptions } from '../../models/LovedTrackOptio
 import { RecentTracksResponse } from '../../models/RecentTracksResponse';
 import PlaceholderImg from '../../public/placeholder.webp';
 import { generateSvg } from '../../utils/SvgUtil';
-import { FooterSize, HeaderSize, StyleOptions } from '../../models/StyleOptions';
+import { FooterStyle, HeaderStyle, StyleOptions, UserVisibility } from '../../models/StyleOptions';
 import { UserInfoResponse } from '../../models/UserInfoResponse';
 
 const defaultCount = 5;
@@ -88,18 +88,19 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         style: lovedStyle,
     };
 
-    const availableHeaderSizes = ['none', 'compact', 'normal'];
-    const headerSize: string | string[] | undefined = req.query['header_size'] || 'normal';
-    if (Array.isArray(headerSize) || !availableHeaderSizes.includes(headerSize)) {
+    // Maintain `header_size` for backwards compatibility in addition to the newer
+    // `header_size` param. `header_size` will take priority.
+    const headerSize: string | string[] | undefined = req.query['header_size'] || HeaderStyle.Normal;
+    const headerStyle: string | string[] | undefined = req.query['header_style'] || headerSize;
+    if (Array.isArray(headerStyle) || !(<any>Object).values(HeaderStyle).includes(headerStyle)) {
         res.statusCode = 400;
-        res.json({ error: `Invalid 'header_size' parameter. Should be one of ${availableHeaderSizes}.` });
+        res.json({ error: `Invalid 'header_style' parameter. Should be one of ${Object.values(HeaderStyle)}.` });
     }
 
-    const availableFooterSizes = ['none', 'compact', 'normal'];
-    const footerSize: string | string[] | undefined = req.query['footer_size'] || 'none';
-    if (Array.isArray(footerSize) || !availableFooterSizes.includes(footerSize)) {
+    const footerStyle: string | string[] | undefined = req.query['footer_style'] || FooterStyle.None;
+    if (Array.isArray(footerStyle) || !(<any>Object).values(FooterStyle).includes(footerStyle)) {
         res.statusCode = 400;
-        res.json({ error: `Invalid 'footer_size' parameter. Should be one of ${availableFooterSizes}.` });
+        res.json({ error: `Invalid 'footer_style' parameter. Should be one of ${Object.values(FooterStyle)}.` });
     }
 
     const borderRadius: string | string[] | undefined = req.query['border_radius'] || '10';
@@ -111,66 +112,62 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
     const bgColor: string | string[] | undefined = req.query['bg_color'] || '212121';
     if (Array.isArray(bgColor) || bgColor.length < 0 || bgColor.length > 8 || bgColor.startsWith('#')) {
         res.statusCode = 400;
-        res.json({ error: `Invalid 'bg_color' parameter. Should be a hexadecimal RGB or RGBA code with no leading \'#\' symbol.` });
+        res.json({
+            error: `Invalid 'bg_color' parameter. Should be a hexadecimal RGB or RGBA code with no leading \'#\' symbol.`,
+        });
     }
 
-    const displayUsername: string | string[] | undefined = req.query['show_user'];
-    const displayStats: string | string[] | undefined = req.query['stats'];
-    const statsInFooter: string | string[] | undefined = req.query['footer_stats'] || 'false';
+    const userVisibility: string | string[] | undefined = req.query['show_user'] || UserVisibility.Never;
+    if (Array.isArray(userVisibility) || !(<any>Object).values(UserVisibility).includes(userVisibility)) {
+        res.statusCode = 400;
+        res.json({ error: `Invalid 'show_user' parameter. Should be one of ${Object.values(UserVisibility)}.` });
+    }
 
     const styleOptions: StyleOptions = {
-        headerSize: headerSize as HeaderSize,
-        footerSize: footerSize as FooterSize,
+        headerStyle: headerStyle as HeaderStyle,
+        footerStyle: footerStyle as FooterStyle,
         borderRadius: parseFloat(borderRadius as string),
-        bgColor: '#'+bgColor,
-        displayUsername: displayUsername === 'true',
-        displayStats: displayStats === 'true',
-        statsInFooter: statsInFooter === 'true',
+        bgColor: '#' + bgColor,
+        userVisibility: userVisibility as UserVisibility,
     };
 
     try {
-        var apiCalls : Promise<AxiosResponse<any,any>>[] = [
-            axios.get<RecentTracksResponse>(
-                'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks',
-                {
-                    params: {
-                        user: user,
-                        extended: 1,
-                        limit: count,
-                        api_key: process.env.API_KEY,
-                        format: 'json',
-                    },
-                }
-            ),
-        ]
+        var apiCalls: Promise<AxiosResponse<any, any>>[] = [
+            axios.get<RecentTracksResponse>('http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks', {
+                params: {
+                    user: user,
+                    extended: 1,
+                    limit: count,
+                    api_key: process.env.API_KEY,
+                    format: 'json',
+                },
+            }),
+        ];
 
         // Only make the second API call if userInfo will actually be shown.
-        if (displayStats || displayUsername || footerSize !== 'none') apiCalls.push(
-            axios.get<UserInfoResponse>(
-                'http://ws.audioscrobbler.com/2.0/?method=user.getinfo',
-                {
+        if (headerStyle.includes('stats') || footerStyle.includes('stats') || userVisibility != UserVisibility.Never)
+            apiCalls.push(
+                axios.get<UserInfoResponse>('http://ws.audioscrobbler.com/2.0/?method=user.getinfo', {
                     params: {
                         user: user,
                         api_key: process.env.API_KEY,
                         format: 'json',
                     },
-                }
-            ),
-        )
+                })
+            );
         const datas = await Promise.all(apiCalls);
 
         const trackData = datas[0].data;
         let userData;
-        if(datas[1] !== undefined) userData = datas[1].data;
-        
-       
+        if (datas[1] !== undefined) userData = datas[1].data;
+
         // Trim array as API may return more than 'count'
         trackData.recenttracks.track = trackData.recenttracks.track.slice(0, count);
 
         // Set base64-encoded cover art images by routing through /api/proxy endpoint
         // This is needed because GitHub's Content Security Policy prohibits external images (inline allowed)
-        let objs : any[] = [...trackData.recenttracks.track];
-        if(userData !== undefined) objs.push(userData.user);
+        let objs: any[] = [...trackData.recenttracks.track];
+        if (userData !== undefined) objs.push(userData.user);
         for (const obj of objs) {
             const smallImg = obj.image[0]['#text'];
             try {
@@ -184,7 +181,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
                 obj.inlineimage = PlaceholderImg;
             }
         }
-        
+
         res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
         res.setHeader('Content-Type', 'image/svg+xml');
         res.statusCode = 200;

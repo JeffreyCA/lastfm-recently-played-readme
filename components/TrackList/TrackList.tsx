@@ -3,7 +3,7 @@ import { LovedTrackOptions } from '../../models/LovedTrackOptions';
 import { TrackInfo } from '../../models/TrackInfo';
 import TrackListHeader from './TrackListHeader';
 import TrackListItem from './TrackListItem';
-import { StyleOptions } from '../../models/StyleOptions';
+import { FooterStyle, HeaderStyle, StyleOptions } from '../../models/StyleOptions';
 import { UserInfo } from '../../models/UserInfo';
 import TrackListFooter from './TrackListFooter';
 
@@ -41,21 +41,13 @@ export default function TrackList(props: Props): JSX.Element {
         <List
             size="small"
             header={
-                styleOptions.headerSize !== 'none' && (
-                    <TrackListHeader 
-                        username={username}
-                        styleOptions={styleOptions}
-                        userInfo={userInfo} 
-                    />
+                styleOptions.headerStyle !== HeaderStyle.None && (
+                    <TrackListHeader username={username} styleOptions={styleOptions} userInfo={userInfo} />
                 )
             }
             footer={
-                (styleOptions.statsInFooter || styleOptions.footerSize !== 'none') && (
-                    <TrackListFooter 
-                        username={username}
-                        styleOptions={styleOptions}
-                        userInfo={userInfo} 
-                    />
+                styleOptions.footerStyle !== FooterStyle.None && (
+                    <TrackListFooter username={username} styleOptions={styleOptions} userInfo={userInfo} />
                 )
             }
             bordered

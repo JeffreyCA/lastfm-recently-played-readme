@@ -1,6 +1,6 @@
 import { Typography } from 'antd';
-import { HeaderSize } from '../../models/StyleOptions';
 import { UserInfo } from '../../models/UserInfo';
+import { StyleOptions } from '../../models/StyleOptions';
 
 const { Text } = Typography;
 
@@ -8,35 +8,60 @@ interface Props {
     /**
      * Size.
      */
-    size: HeaderSize;
+    size: string;
+    /**
+     * User Info.
+     */
+    styleOptions: StyleOptions;
     /**
      * User Info.
      */
     userInfo: UserInfo;
+    /**
+     * Stats Location.
+     */
+    centerStats: boolean;
 }
 
 /**
  * Track list header component.
  */
 export default function Stats(props: Props): JSX.Element {
+    const classes = props.centerStats ? 'center-text' : '';
     return (
-        <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-            <div className={`lastfm-stats ${props.size}`}>
-                <div>                    
-                    <Text strong>{parseInt(props.userInfo.playcount).toLocaleString()}</Text>
-                    <Text strong>Scrobbles</Text>
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: props.centerStats ? 'center' : 'space-between',
+            }}
+        >
+            <div className={`lastfm-stats classes ${props.size.includes('compact') ? 'compact' : ''}`}>
+                <div>
+                    <Text className={classes} strong>
+                        {parseInt(props.userInfo.playcount).toLocaleString()}
+                    </Text>
+                    <Text className={classes} strong>
+                        Scrobbles
+                    </Text>
                 </div>
                 <div>
-                    <Text strong >{parseInt(props.userInfo.artist_count).toLocaleString()}</Text>
-                    <Text strong>Arists</Text>
+                    <Text className={classes} strong>
+                        {parseInt(props.userInfo.artist_count).toLocaleString()}
+                    </Text>
+                    <Text className={classes} strong>
+                        Artists
+                    </Text>
                 </div>
-                <div>                    
-                    <Text strong >{parseInt(props.userInfo.track_count).toLocaleString()}</Text>
-                    <Text strong>Tracks</Text>
+                <div>
+                    <Text className={classes} strong>
+                        {parseInt(props.userInfo.track_count).toLocaleString()}
+                    </Text>
+                    <Text className={classes} strong>
+                        Tracks
+                    </Text>
                 </div>
             </div>
-            
         </div>
     );
-    
 }

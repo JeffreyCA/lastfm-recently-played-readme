@@ -1,6 +1,6 @@
 import { Image, Space, Typography } from 'antd';
 import LastFmIcon from '../../public/lastfm.svg';
-import { StyleOptions } from '../../models/StyleOptions';
+import { HeaderStyle, StyleOptions, UserVisibility } from '../../models/StyleOptions';
 import { UserInfo } from '../../models/UserInfo';
 import Stats from './Stats';
 import Profile from './Profile';
@@ -12,10 +12,10 @@ interface Props {
      * Username.
      */
     username: string;
-     /**
+    /**
      * Style Options
      */
-     styleOptions: StyleOptions;
+    styleOptions: StyleOptions;
     /**
      * User Info.
      */
@@ -26,52 +26,74 @@ interface Props {
  * Track list header component.
  */
 export default function TrackListHeader(props: Props): JSX.Element {
-    var iconWidth = props.styleOptions.headerSize === 'compact' ? 45 : 60;
-    var stats, profile;
-    if(!props.styleOptions.statsInFooter)
-    {
-        
-    stats = props.styleOptions.displayStats ? 
-    <Stats
-        size={props.styleOptions.headerSize}
-        userInfo={props.userInfo}
-    /> 
-    :false;
-    profile = props.styleOptions.displayUsername ?
-        <Profile 
-            displayUsername={props.styleOptions.displayUsername}
-            userInfo={props.userInfo} 
-            size={props.styleOptions.headerSize}
+    const compact = props.styleOptions.headerStyle.includes('compact');
+    const iconWidth = compact ? 45 : 60;
+    const showProfile =
+        props.styleOptions.userVisibility == UserVisibility.Always ||
+        props.styleOptions.userVisibility == UserVisibility.Header;
+    const statsOnly =
+        props.styleOptions.headerStyle == HeaderStyle.NormalStatsOnly ||
+        props.styleOptions.headerStyle == HeaderStyle.CompactStatsOnly;
+    const showStats = props.styleOptions.headerStyle.includes('stats');
+
+    const centerStats = statsOnly && !showProfile;
+    var stats, profile, title;
+
+    stats = showStats ? (
+        <Stats
+            size={props.styleOptions.headerStyle}
+            userInfo={props.userInfo}
+            styleOptions={props.styleOptions}
+            centerStats={centerStats}
         />
-        :false;
-    }
+    ) : (
+        false
+    );
+    var inlineProfile = (!stats || compact) && !statsOnly;
+    // Show profile if 'show_user' query is true.
+    profile = showProfile ? (
+        <Profile
+            userVisibility={props.styleOptions.userVisibility}
+            userInfo={props.userInfo}
+            size={props.styleOptions.headerStyle}
+        />
+    ) : (
+        false
+    );
+
+    // Hide title section if not 'HeaderStyle.StatsOnly'.
+    title = !statsOnly ? (
+        <Space>
+            <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href={`https://www.last.fm/user/${props.username}`}
+                style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: -1 }}
+            >
+                <Image preview={false} className="lastfm-icon" src={LastFmIcon} width={iconWidth}></Image>
+            </a>
+            <Text className={`lastfm-title${compact ? '-compact' : ''}`}>Recently Played</Text>
+        </Space>
+    ) : (
+        false
+    );
+
     return (
         <div>
-            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Space>
-                    <a
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href={`https://www.last.fm/user/${props.username}`}
-                        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: -1 }}>
-                        <Image preview={false} className="lastfm-icon" src={LastFmIcon} width={iconWidth}></Image>
-                    </a>
-                    <Text className={`lastfm-title${props.styleOptions.headerSize === 'compact' ? '-compact' : ''}`}>Recently Played</Text>
-                    
-                </Space>
-                {(!stats || props.styleOptions.headerSize === 'compact') ? profile : false}
+            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                {title}
+                {inlineProfile ? profile : false}
             </div>
-            <div 
-            style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: centerStats ? 'center' : 'space-between',
+                }}
             >
-                <Space>
-                {stats}
-                
-                </Space>
-                {(stats && props.styleOptions.headerSize !== 'compact') ? profile : false}
+                <Space>{stats}</Space>
+                {!inlineProfile ? profile : false}
             </div>
-
         </div>
     );
-    
 }
