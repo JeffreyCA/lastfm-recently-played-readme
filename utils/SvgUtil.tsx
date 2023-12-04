@@ -4,7 +4,7 @@ import SvgWidget from '../components/SvgWidget';
 import { LovedTrackOptions } from '../models/LovedTrackOptions';
 import { RecentTracksResponse } from '../models/RecentTracksResponse';
 import { UserInfoResponse } from '../models/UserInfoResponse';
-import { FooterStyle, HeaderStyle, StyleOptions, UserVisibility } from '../models/StyleOptions';
+import { FooterStyle, HeaderStyle, StyleOptions } from '../models/StyleOptions';
 
 const baseHeightsHeader: Record<HeaderStyle, number> = {
     [HeaderStyle.None]: 0,
@@ -20,8 +20,8 @@ const baseHeightsFooter: Record<FooterStyle, number> = {
     [FooterStyle.Wave]: 34,
     [FooterStyle.CompactStats]: 30,
     [FooterStyle.NormalStats]: 42,
-    [FooterStyle.CompactBlank]: 26,
-    [FooterStyle.NormalBlank]: 42,
+    [FooterStyle.Compact]: 26,
+    [FooterStyle.Normal]: 42,
 };
 
 const heightPerItem = 57;

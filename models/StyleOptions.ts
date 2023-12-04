@@ -13,8 +13,8 @@ export enum FooterStyle {
     Wave = 'wave',
     CompactStats = 'compact_stats',
     NormalStats = 'normal_stats',
-    CompactBlank = 'compact_blank',
-    NormalBlank = 'normal_blank',
+    Compact = 'compact',
+    Normal = 'normal',
 }
 
 export enum UserVisibility {
