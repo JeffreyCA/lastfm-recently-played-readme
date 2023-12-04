@@ -23,8 +23,8 @@ interface Props {
  */
 export default function Profile(props: Props): JSX.Element {
     const profileWidth = props.size.includes('compact') ? 20 : 30;
-    var profileImg = '';
-    var name = '';
+    let profileImg = '';
+    let name = '';
     if (props.userInfo !== undefined) {
         profileImg = props.userInfo.inlineimage;
         name = props.userInfo.name;

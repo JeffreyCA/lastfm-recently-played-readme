@@ -37,9 +37,8 @@ export default function TrackListHeader(props: Props): JSX.Element {
     const showStats = props.styleOptions.headerStyle.includes('stats');
 
     const centerStats = statsOnly && !showProfile;
-    var stats, profile, title;
 
-    stats = showStats ? (
+    const stats = showStats ? (
         <Stats
             size={props.styleOptions.headerStyle}
             userInfo={props.userInfo}
@@ -49,9 +48,9 @@ export default function TrackListHeader(props: Props): JSX.Element {
     ) : (
         false
     );
-    var inlineProfile = (!stats || compact) && !statsOnly;
+    const inlineProfile = (!stats || compact) && !statsOnly;
     // Show profile if 'show_user' query is true.
-    profile = showProfile ? (
+    const profile = showProfile ? (
         <Profile
             userVisibility={props.styleOptions.userVisibility}
             userInfo={props.userInfo}
@@ -62,14 +61,13 @@ export default function TrackListHeader(props: Props): JSX.Element {
     );
 
     // Hide title section if not 'HeaderStyle.StatsOnly'.
-    title = !statsOnly ? (
+    const title = !statsOnly ? (
         <Space>
             <a
                 target="_blank"
                 rel="noopener noreferrer"
                 href={`https://www.last.fm/user/${props.username}`}
-                style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: -1 }}
-            >
+                style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: -1 }}>
                 <Image preview={false} className="lastfm-icon" src={LastFmIcon} width={iconWidth}></Image>
             </a>
             <Text className={`lastfm-title${compact ? '-compact' : ''}`}>Recently Played</Text>
@@ -89,8 +87,7 @@ export default function TrackListHeader(props: Props): JSX.Element {
                     display: 'flex',
                     flexDirection: 'row',
                     justifyContent: centerStats ? 'center' : 'space-between',
-                }}
-            >
+                }}>
                 <Space>{stats}</Space>
                 {!inlineProfile ? profile : false}
             </div>

@@ -66,8 +66,7 @@ export default function SvgWidget(props: SvgWidgetProps): JSX.Element {
                     <div
                         xmlns="http://www.w3.org/1999/xhtml"
                         className={`svg-widget ${styleOptions.headerStyle}`}
-                        style={{ color: 'white' }}
-                    >
+                        style={{ color: 'white' }}>
                         <TrackList
                             trackInfoList={trackInfoList}
                             username={username}

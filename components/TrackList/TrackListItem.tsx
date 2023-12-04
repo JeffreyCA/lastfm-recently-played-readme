@@ -49,8 +49,7 @@ export default function TrackListItem(props: Props): JSX.Element {
     return (
         <List.Item
             className="track-item"
-            extra={<Timestamp trackInfo={trackInfo} lovedTrackOptions={lovedTrackOptions} />}
-        >
+            extra={<Timestamp trackInfo={trackInfo} lovedTrackOptions={lovedTrackOptions} />}>
             <List.Item.Meta
                 avatar={
                     <div style={anyLovesInList && shouldShowLovedBesideArt ? avatarStyleLoved : avatarStyle}>
@@ -78,8 +77,7 @@ export default function TrackListItem(props: Props): JSX.Element {
                             target="_blank"
                             rel="noopener noreferrer"
                             href={trackUrl}
-                            title={trackName}
-                        >
+                            title={trackName}>
                             {trackName}
                         </a>
                         {shouldShowLovedBesideTitle && isTrackLoved && (

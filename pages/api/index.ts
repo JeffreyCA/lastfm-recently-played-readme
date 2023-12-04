@@ -17,8 +17,6 @@ const maxWidth = 1000;
 
 const defaultLovedStyle = LovedTrackStyle.RightOfAlbumArt;
 
-const defaultStatsVisibility = false;
-
 const BaseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
 
 export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
@@ -31,14 +29,6 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         res.statusCode = 400;
         res.json({ error: `Invalid 'user' parameter` });
         return;
-    }
-
-    // Parse 'stats' query parameter.
-    const statsQuery: string | string[] | undefined = req.query['stats'];
-    let stats = defaultStatsVisibility;
-
-    if (typeof statsQuery === 'string') {
-        stats = statsQuery === 'true';
     }
 
     // Parse 'width' query parameter
@@ -113,7 +103,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
     if (Array.isArray(bgColor) || bgColor.length < 0 || bgColor.length > 8 || bgColor.startsWith('#')) {
         res.statusCode = 400;
         res.json({
-            error: `Invalid 'bg_color' parameter. Should be a hexadecimal RGB or RGBA code with no leading \'#\' symbol.`,
+            error: `Invalid 'bg_color' parameter. Should be a hexadecimal RGB or RGBA code with no leading # symbol.`,
         });
     }
 
@@ -132,7 +122,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
     };
 
     try {
-        var apiCalls: Promise<AxiosResponse<any, any>>[] = [
+        const apiCalls: Promise<AxiosResponse<any, any>>[] = [
             axios.get<RecentTracksResponse>('http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks', {
                 params: {
                     user: user,
@@ -166,7 +156,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
 
         // Set base64-encoded cover art images by routing through /api/proxy endpoint
         // This is needed because GitHub's Content Security Policy prohibits external images (inline allowed)
-        let objs: any[] = [...trackData.recenttracks.track];
+        const objs: any[] = [...trackData.recenttracks.track];
         if (userData !== undefined) objs.push(userData.user);
         for (const obj of objs) {
             const smallImg = obj.image[0]['#text'];

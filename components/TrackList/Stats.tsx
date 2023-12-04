@@ -34,8 +34,7 @@ export default function Stats(props: Props): JSX.Element {
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: props.centerStats ? 'center' : 'space-between',
-            }}
-        >
+            }}>
             <div className={`lastfm-stats classes ${props.size.includes('compact') ? 'compact' : ''}`}>
                 <div>
                     <Text className={classes} strong>

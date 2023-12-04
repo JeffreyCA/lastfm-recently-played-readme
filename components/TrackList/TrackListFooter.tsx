@@ -50,7 +50,7 @@ export default function TrackListFooter(props: Props): JSX.Element {
     );
 
     // Display the footer decoration only if the user specifies it
-    var result;
+    let result;
     if (props.styleOptions.footerStyle == FooterStyle.Wave) {
         result = (
             <div
@@ -58,8 +58,7 @@ export default function TrackListFooter(props: Props): JSX.Element {
                     margin: '0 !important',
                     padding: '0 !important',
                     height: '40px',
-                }}
-            >
+                }}>
                 <Image style={{ objectFit: 'cover', opacity: '100%' }} height={'42px'} preview={false} src={WaveWebp} />
             </div>
         );
@@ -71,8 +70,7 @@ export default function TrackListFooter(props: Props): JSX.Element {
                     display: 'flex',
                     flexDirection: 'row',
                     justifyContent: centerStats ? 'center' : 'space-between',
-                }}
-            >
+                }}>
                 <Space>{stats}</Space>
                 {profile}
             </div>
