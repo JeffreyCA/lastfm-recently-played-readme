@@ -3,13 +3,27 @@ import { flushToHTML } from 'styled-jsx/server';
 import SvgWidget from '../components/SvgWidget';
 import { LovedTrackOptions } from '../models/LovedTrackOptions';
 import { RecentTracksResponse } from '../models/RecentTracksResponse';
-import { HeaderSize, StyleOptions } from '../models/StyleOptions';
+import { UserInfoResponse } from '../models/UserInfoResponse';
+import { FooterStyle, HeaderStyle, StyleOptions } from '../models/StyleOptions';
 
-const baseHeights: Record<HeaderSize, number> = {
-    none: 0,
-    compact: 24,
-    normal: 40,
+const baseHeightsHeader: Record<HeaderStyle, number> = {
+    [HeaderStyle.None]: 0,
+    [HeaderStyle.Compact]: 24,
+    [HeaderStyle.Normal]: 44,
+    [HeaderStyle.CompactStats]: 55,
+    [HeaderStyle.NormalStats]: 74,
+    [HeaderStyle.CompactStatsOnly]: 38,
+    [HeaderStyle.NormalStatsOnly]: 47,
 };
+const baseHeightsFooter: Record<FooterStyle, number> = {
+    [FooterStyle.None]: 0,
+    [FooterStyle.Wave]: 34,
+    [FooterStyle.CompactStats]: 30,
+    [FooterStyle.NormalStats]: 42,
+    [FooterStyle.Compact]: 26,
+    [FooterStyle.Normal]: 42,
+};
+
 const heightPerItem = 57;
 const heightBuffer = 5;
 
@@ -17,10 +31,17 @@ export function generateSvg(
     recentTracksRes: RecentTracksResponse,
     width: number,
     lovedTrackOptions: LovedTrackOptions,
-    styleOptions: StyleOptions
+    styleOptions: StyleOptions,
+    UserInfoResponse: UserInfoResponse
 ): string {
+    let userInfo;
+    if (UserInfoResponse !== undefined) userInfo = UserInfoResponse.user;
     const count = recentTracksRes.recenttracks.track.length;
-    const height = baseHeights[styleOptions.headerSize] + count * heightPerItem + heightBuffer;
+    const height =
+        baseHeightsHeader[styleOptions.headerStyle] +
+        baseHeightsFooter[styleOptions.footerStyle] +
+        count * heightPerItem +
+        heightBuffer;
     const svgBody = ReactDOMServer.renderToStaticMarkup(
         <SvgWidget
             width={width}
@@ -28,6 +49,7 @@ export function generateSvg(
             recentTracksResponse={recentTracksRes}
             lovedTrackOptions={lovedTrackOptions}
             styleOptions={styleOptions}
+            userInfo={userInfo}
         />
     );
     const svgStyles = flushToHTML();
