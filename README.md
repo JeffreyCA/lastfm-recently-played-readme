@@ -28,17 +28,18 @@ To add link to your last.fm profile, wrap the image in a link tag:
 
 You can customize your list.fm status by adding query parameters after the url. Here is a list of available parameters.
 
-| Parameter       | Description                                                              | Type    | Default | Valid Values                                                                              |
-| --------------- | ------------------------------------------------------------------------ | ------- | ------- | ----------------------------------------------------------------------------------------- |
-| `count`         | Number of recent tracks to display                                       | number  | 5       | 1 - 10                                                                                    |
-| `width`         | Width of the card in pixels                                              | number  | 400     | 300-1000                                                                                  |
-| `loved`         | Show a heart indicator for loved tracks                                  | boolean | false   | true, false                                                                               |
-| `show_user`     | Show your username and profile picture in the specified location.       | string  | never   | never, always, header, footer                         |
-| `header_style`  | Adjust the size of the header or hide it                                 | string  | normal  | none, compact, normal, compact_stats, normal_stats, compact_stats_only, normal_stats_only |
-| `footer_style`  | Adjust the size of the footer or hide it                                 | string  | none    | none, wave, compact, normal   compact_stats, normal_stats                     |
-| `border_radius` | Adjust the radius of the card                                            | number  | 10      | 0 - 100                                                                                   |
-| `loved_style`   | Customize the indicator placement for loved tracks                       | number  | 1       | 1, 2, 3, 4                                                                                |
-| `bg_color`      | Customize the background color of the card. Supports alpha transparency. | string  | 212121  | RGB/A hexadecimal                                                                         |
+| Parameter       | Description                                                              | Type    | Default | Valid Values                                                                             |
+| --------------- | -------------------------------------------------------------------------| ------- | ------- | ---------------------------------------------------------------------------------------- |
+| `count`         | Number of recent tracks to display                                       | number  | 5      | 1 - 10                                                                                    |
+| `width`         | Width of the card in pixels                                              | number  | 400    | 300 - 1000                                                                                |
+| `loved`         | Show a heart indicator for loved tracks                                  | boolean | false  | true, false                                                                               |
+| `show_user`     | Show your username and profile picture in the specified location.        | string  | never  | never, always, header, footer                                                             |
+| `header_style`  | Adjust the size of the header or hide it                                 | string  | normal | none, compact, normal, compact_stats, normal_stats, compact_stats_only, normal_stats_only |
+| `footer_style`  | Adjust the size of the footer or hide it                                 | string  | none   | none, wave, compact, normal, compact_stats, normal_stats                                  |
+| `border_radius` | Adjust the radius of the card                                            | number  | 10     | 0 - 100                                                                                   |
+| `loved_style`   | Customize the indicator placement for loved tracks                       | number  | 1      | 1, 2, 3, 4                                                                                |
+| `bg_color`      | Customize the background color of the card. Supports alpha transparency. | string  | 212121 | RGB/A hexadecimal                                                                         |
+| `maxage`        | `Cache-Control` header's `s-maxage` value in seconds. Controls how long Vercel's CDN caches the response. | number | 120 | 60 - 3600                                                    |
 
 ### Examples
 

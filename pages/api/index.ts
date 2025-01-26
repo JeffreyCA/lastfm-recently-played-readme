@@ -15,6 +15,10 @@ const defaultWidth = 400;
 const minWidth = 300;
 const maxWidth = 1000;
 
+const defaultMaxAge = 120;
+const minMaxAge = 60;
+const maxMaxAge = 3600;
+
 const defaultLovedStyle = LovedTrackStyle.RightOfAlbumArt;
 
 const BaseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
@@ -121,6 +125,17 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
         userVisibility: userVisibility as UserVisibility,
     };
 
+    const maxageQuery: string | string[] | undefined = req.query['maxage'];
+    let maxAge = defaultMaxAge;
+
+    if (typeof maxageQuery === 'string') {
+        maxAge = parseInt(maxageQuery);
+    }
+    if (!maxAge || Array.isArray(maxageQuery) || maxAge < minMaxAge || maxAge > maxMaxAge) {
+        res.statusCode = 400;
+        res.json({ error: `Invalid 'maxage' parameter. Should be between ${minMaxAge} and ${maxMaxAge}.` });
+    }
+
     try {
         const apiCalls: Promise<AxiosResponse<any, any>>[] = [
             axios.get<RecentTracksResponse>('http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks', {
@@ -172,7 +187,7 @@ export default async (req: NextApiRequest, res: NextApiResponse): Promise<void> 
             }
         }
 
-        res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
+        res.setHeader('Cache-Control', `s-maxage=${maxAge}, stale-while-revalidate`);
         res.setHeader('Content-Type', 'image/svg+xml');
         res.statusCode = 200;
         res.send(generateSvg(trackData, width, lovedTrackOptions, styleOptions, userData));
