@@ -1,190 +1,213 @@
 # Last.fm Recently Played README
 
-Show your recent Last.fm scrobbles on your GitHub profile README. Powered by [Vercel](https://vercel.com).
+Show your recent Last.fm scrobbles on your GitHub profile README. Powered by [Cloudflare](https://www.cloudflare.com/products/workers/).  
+Check out [spotify-recently-played-readme](https://github.com/JeffreyCA/spotify-recently-played-readme) for a similar integration for Spotify.
 
-> Check out [spotify-recently-played-readme](https://github.com/JeffreyCA/spotify-recently-played-readme) for a similar integration for Spotify.
+[![Try the interactive configurator](https://img.shields.io/badge/Try_the_interactive_configurator-D51007?style=for-the-badge&logo=lastdotfm&logoColor=white)](https://lastfm-recently-played.jeffreyca.workers.dev)
 
-## Getting Started
+Pick your options, preview the card, and copy/paste the snippet into your README.
+
+---
+
+## Getting started
 
 Just add the following into your README and set the query parameter `user` to your Last.fm username.
 
-```md
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)
+```markdown
+![My scrobbles](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01)
 ```
 
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)
+![My scrobbles](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01)
 
-To add link to your last.fm profile, wrap the image in a link tag:
+Or make the whole card a link to your Last.fm profile:
 
-```md
-[![My Last.fm](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)](https://www.last.fm/user/JeffreyCA01)
+```markdown
+[![My scrobbles](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01)](https://www.last.fm/user/JeffreyCA01)
 ```
 
-[![My Last.fm](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01)](https://www.last.fm/user/JeffreyCA01)
+[![My scrobbles](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01)](https://www.last.fm/user/JeffreyCA01)
+
+> [!NOTE]
+> GitHub caches README images through its own proxy, so new scrobbles may appear within a few minutes rather than instantly.
 
 ## Customization
 
-### Parameters
+Add parameters to the URL, e.g. `?user=JeffreyCA01&theme=light&count=3`.
 
-You can customize your list.fm status by adding query parameters after the url. Here is a list of available parameters.
+| Parameter | Description | Default | Values |
+| --- | --- | --- | --- |
+| `user` | Whose scrobbles to show | *required* | Last.fm username |
+| `count` | How many tracks. A now-playing track counts as one | `5` | `1`-`10` |
+| `theme` | Colour scheme | `dark` | `dark`, `legacy`, `light`, `nord`, `catppuccin`, `transparent` |
+| `bg_color` | Background colour only. Text colours stay as the theme has them | theme's | hex digits, no `#` - e.g. `212121` |
+| `width` | Card width in pixels | `400` | `260`-`800` |
+| `radius` | Corner rounding | `10` | `0`-`24` |
+| `art` | Album artwork | `1` | `1` / `0` |
+| `header` | The "Recently Played" row | `1` | `1` / `0` |
+| `logo` | Last.fm wordmark in the header | `1` | `1` / `0` |
+| `profile` | Where your username and picture appear | `header` | `header`, `footer-left`, `footer-right`, `off` |
+| `username` | Show your username in that spot | `1` | `1` / `0` |
+| `avatar` | Show your profile picture in that spot | `1` | `1` / `0` |
+| `time` | "6m ago" timestamps | `1` | `1` / `0` |
+| `stats` | Scrobbles / artists / tracks totals | `off` | `off`, `block`, `block-center`, `compact` |
+| `footer` | What sits below the tracks. Ignored when `profile` is in the footer | `off` | `off`, `stats`, `wave` |
+| `loved` | Where to mark tracks you've hearted | `time` | `off`, `between`, `between-all`, `title`, `time` |
 
-| Parameter       | Description                                                              | Type    | Default | Valid Values                                                                             |
-| --------------- | -------------------------------------------------------------------------| ------- | ------- | ---------------------------------------------------------------------------------------- |
-| `count`         | Number of recent tracks to display                                       | number  | 5      | 1 - 10                                                                                    |
-| `width`         | Width of the card in pixels                                              | number  | 400    | 300 - 1000                                                                                |
-| `loved`         | Show a heart indicator for loved tracks                                  | boolean | false  | true, false                                                                               |
-| `show_user`     | Show your username and profile picture in the specified location.        | string  | never  | never, always, header, footer                                                             |
-| `header_style`  | Adjust the size of the header or hide it                                 | string  | normal | none, compact, normal, compact_stats, normal_stats, compact_stats_only, normal_stats_only |
-| `footer_style`  | Adjust the size of the footer or hide it                                 | string  | none   | none, wave, compact, normal, compact_stats, normal_stats                                  |
-| `border_radius` | Adjust the radius of the card                                            | number  | 10     | 0 - 100                                                                                   |
-| `loved_style`   | Customize the indicator placement for loved tracks                       | number  | 1      | 1, 2, 3, 4                                                                                |
-| `bg_color`      | Customize the background color of the card. Supports alpha transparency. | string  | 212121 | RGB/A hexadecimal                                                                         |
-| `maxage`        | `Cache-Control` header's `s-maxage` value in seconds. Controls how long Vercel's CDN caches the response. | number | 120 | 60 - 3600                                                    |
+Booleans also accept `true`/`false`, `yes`/`no`, `on`/`off`. Numbers outside their range are clamped rather than rejected.
 
-### Examples
+### Loved tracks
 
-#### Customizing Track Count
+| `loved` | Where the indicator (heart icon) goes |
+| --- | --- |
+| `between` | Left of the track name, loved tracks only |
+| `between-all` | Left of the track name, greyed out when not loved |
+| `title` | Right after the track name |
+| `time` | Just before the timestamp (default) |
+| `off` | Hidden |
 
-Change the amount of recent tracks that are displayed.
+### Automatic light and dark
 
-> Default: `5`
+GitHub supports `<picture>` in READMEs, so the card can follow the reader's theme:
 
-> Min Value: `1`
-
-> Max Value: `10`
-
-```md
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1)
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)"
+          srcset="https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=dark">
+  <img src="https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=light">
+</picture>
 ```
 
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&count=1)
+## Examples
 
-#### Customizing card width
+**Profile stats, in one line**
 
-Change the width of the card, in pixels.
-
-> Default: `400`
-
-> Min Value: `300`
-
-> Max Value: `1000`
-
-```md
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=600)
+```markdown
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&stats=compact&count=3)
 ```
 
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=600)
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&stats=compact&count=3)
 
-#### Show loved tracks
+**Stats as centred columns, with a wave**
 
-Show a heart indicator for loved tracks.
-
-> Default: `false`
-
-> Possible Values: `true` | `false`
-
-```md
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&loved=true)
+```markdown
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&stats=block-center&footer=wave&count=3)
 ```
 
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&loved=true)
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&stats=block-center&footer=wave&count=3)
 
-#### Show user profile
+**Your profile in the footer instead of the header**
 
-Determines if and where the user's profile information is shown. If you want to show exclusively the user's profile in a given section, use the `normal` or `compact` header and footer styles.
-
-> Default: `never`
-
-> Possible Values: `never` | `always` | `header` | `footer`
-
-```md
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&show_user=header)
+```markdown
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&header=0&profile=footer-right&count=3)
 ```
 
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&show_user=header)
-|                                                 `header`                                                  |                                                 `footer & footer_style=normal`                                                  |
-| :-----------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: | 
-| ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=350&count=2&show_user=header) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=350&count=2&footer_style=normal&show_user=footer) |
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&header=0&profile=footer-right&count=3)
 
-#### Header Styles
+**Hearts beside every track, light theme**
 
-Changes the size and content of the header. You can use header and footer styles to show the user's stats (i.e. scrobbles, artist count, and track count). Using a `_stats_only` style will center the stats if the user's profile is not visible within the header. Use the `compact` or `normal` style in combination with `show_user` to exclusively show the user profile in the footer.
-
-> Default: `normal`
-
-> Alias: `header_size`
-
-> Possible Values: `none` | `normal` | `compact` | `normal_stats` | `compact_stats` | `normal_stats_only` | `compact_stats_only`
-
-|                                                 `none`                                                  |                                                 `normal_stats`                                                  |                                                 `compact_stats_only`                                                  |
-| :-----------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------: |
-| ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&header_style=none) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&header_style=normal_stats) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&header_style=compact_stats_only) |
-
-#### Footer Styles
-
-Changes the size and content of the footer. You can use header and footer styles to show the user's stats (i.e. scrobbles, artist count, and track count). Using a `_stats` style will center the stats if the user's profile is not visible within the footer. Use the `compact` or `normal` style in combination with `show_user` to exclusively show the user profile in the footer.
-
-> Default: `none`
-
-> Possible Values: `none` | `wave` | `normal` | `compact` | `normal_stats` | `compact_stats` | 
-
-|                                                 `wave`                                                  |                                                 `normal`                                                  |                                                 `normal_stats`                                                  |
-| :-----------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: |
-| ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&footer_style=wave) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&footer_style=normal) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&footer_style=normal_stats) |
-
-#### Loved Style
-
-Customize the indicator placement for loved tracks.
-
-> Default: `1`
-
-> Possible Values: `1` | `2` | `3` | `4`
-
-|                                                    Style 1                                                     |                                                    Style 2                                                     |                                                    Style 3                                                     |                                                    Style 4                                                     |
-| :------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------: |
-| ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=1) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=2) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=3) | ![](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&width=300&count=2&loved=true&loved_style=4) |
-
-#### Change Background Color
-
-Change the background color of the main card with a hexadecimal RGB/A code. Supports alpha transparency.
-
-> Default: `212121`
-
-> Possible Values: `any valid RGB/A hex-code`
-
-```md
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&bg_color=000000)
+```markdown
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=light&loved=between-all&count=3)
 ```
 
-![My scrobbles](https://lastfm-recently-played.vercel.app/api?user=JeffreyCA01&bg_color=000000)
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=light&loved=between-all&count=3)
 
-## Deploying own Vercel project
+**Nord, hearts after the track name, stats as columns**
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import/git?s=https%3A%2F%2Fgithub.com%2FJeffreyCA%2Flastfm-recently-played-readme&env=API_KEY,VERCEL_URL)
+```markdown
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=nord&loved=title&stats=block&count=3)
+```
 
-Deploy your own Vercel project using the link above. Next, you'll need to set the `API_KEY` environment variable to your Last.fm API key. You'll also need to set the `VERCEL_URL` system environment variable in the Vercel project settings.
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=nord&loved=title&stats=block&count=3)
+
+**Catppuccin with a custom background**
+
+```markdown
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=catppuccin&bg_color=181825&count=3)
+```
+
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=catppuccin&bg_color=181825&count=3)
+
+**Text only - no artwork, no logo, no picture, square corners**
+
+```markdown
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&art=0&logo=0&avatar=0&radius=0&count=4)
+```
+
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&art=0&logo=0&avatar=0&radius=0&count=4)
+
+**Narrow, for a sidebar or a table cell**
+
+```markdown
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&width=280&count=3&time=0)
+```
+
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&width=280&count=3&time=0)
+
+**Ten tracks, wide, everything on**
+
+```markdown
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&count=10&width=560&stats=compact&footer=wave&loved=time)
+```
+
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&count=10&width=560&stats=compact&footer=wave&loved=time)
+
+**Transparent, to sit on any background**
+
+```markdown
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=transparent&count=3)
+```
+
+![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=transparent&count=3)
+
+---
 
 ## Running locally
 
-1. Clone Git repo
-    ```sh
-    $ git clone https://github.com/JeffreyCA/lastfm-recently-played-readme.git
-    ```
-2. Install Node dependencies
-    ```sh
-    $ npm install
-    ```
-3. Create `.env` file containing the following:
-    ```sh
-    API_KEY=<Last.fm API key>
-    ```
-4. Run development server
-    ```sh
-    $ npm run dev
-    ```
+Requires Node 22+.
 
-The app will be running at [http://localhost:3000](http://localhost:3000).
+```bash
+git clone https://github.com/JeffreyCA/lastfm-priv.git
+cd lastfm-priv
+npm install
+```
 
-## License
+Get a Last.fm API key at [last.fm/api/account/create](https://www.last.fm/api/account/create).
+
+```bash
+cp .dev.vars.example .dev.vars   # then paste your key in
+npm run dev
+```
+
+That serves the configurator at <http://localhost:8787> and the widget at `http://localhost:8787/svg?user=YOUR_USERNAME`.
+
+```bash
+npm run typecheck
+npm test
+```
+
+## Deploying
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/JeffreyCA/lastfm-priv)
+
+That clones the repo into your own account, provisions the Worker, and prompts for `LASTFM_API_KEY`. Every later push to `main` redeploys. It fits comfortably inside the free tier.
+
+To deploy by hand instead:
+
+```bash
+npx wrangler secret put LASTFM_API_KEY
+npm run deploy
+```
+
+If you attach a custom domain, a WAF rate-limit rule on `/svg` (say 60 requests/minute per IP) is worth adding, since the URL is public and anyone can point it at any username. WAF rules need a domain you control; they can't be applied to a `*.workers.dev` URL.
+
+## How it works
+
+The Worker asks Last.fm for your recent tracks, downloads the album art, and renders everything into a single self-contained SVG. Album art is embedded directly in the image, because an SVG displayed in an `<img>` can't load anything from outside itself.
+
+Track data comes from `user.getRecentTracks`, which is public - that's why this needs nothing from you but a username. Responses are cached briefly to keep the shared API key well inside Last.fm's limits.
+
+## Licence
 
 [MIT](LICENSE)
+
+Not affiliated with Last.fm; the Last.fm name and logo are their trademarks.

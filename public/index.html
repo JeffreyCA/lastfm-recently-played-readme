@@ -1,1 +1,182 @@
-The app is running!
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Last.fm Recently Played - README widget</title>
+    <meta
+      name="description"
+      content="Embed your Last.fm listening history in a GitHub profile README."
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>%F0%9F%8E%B5</text></svg>"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>Last.fm <span>Recently Played</span></h1>
+      <p>An embeddable widget for your GitHub profile README.</p>
+    </header>
+
+    <main>
+      <div class="split">
+        <section aria-label="Options">
+          <div class="field">
+            <div class="field-head">
+              <label for="user">Last.fm username</label>
+              <span class="error" id="user-error" role="alert"></span>
+            </div>
+            <input
+              id="user"
+              type="text"
+              placeholder="e.g. rj"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="field">
+            <label for="theme">Theme</label>
+            <select id="theme">
+              <option value="dark">Dark</option>
+              <option value="legacy">Legacy</option>
+              <option value="light">Light</option>
+              <option value="nord">Nord</option>
+              <option value="catppuccin">Catppuccin</option>
+              <option value="transparent">Transparent</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="field-head">
+              <label for="bg-color">Background colour</label>
+              <span class="error" id="bg-color-error" role="alert"></span>
+            </div>
+            <input
+              id="bg-color"
+              type="text"
+              placeholder="theme default, e.g. 212121"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="field">
+            <label for="loved">Loved tracks heart indicator</label>
+            <select id="loved">
+              <option value="between">Left of track name</option>
+              <option value="between-all">Left of track name, greyed if not loved</option>
+              <option value="title">Right of track name</option>
+              <option value="time" selected>Left of timestamp</option>
+              <option value="off">Hidden</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="stats">Profile stats</label>
+            <select id="stats">
+              <option value="off">Hidden</option>
+              <option value="block">Columns</option>
+              <option value="block-center">Columns, centred</option>
+              <option value="compact">One line</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="count">Tracks <output id="count-out">5</output></label>
+              <input id="count" type="range" min="1" max="10" value="5" />
+            </div>
+            <div class="field">
+              <label for="width">Width <output id="width-out">400</output>px</label>
+              <input id="width" type="range" min="260" max="800" step="10" value="400" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="radius">Corner radius <output id="radius-out">10</output>px</label>
+            <input id="radius" type="range" min="0" max="24" value="10" />
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="profile">Show profile</label>
+              <select id="profile">
+                <option value="header">Header</option>
+                <option value="footer-left">Footer (left)</option>
+                <option value="footer-right">Footer (right)</option>
+                <option value="off">Hidden</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="footer">Footer extras</label>
+              <select id="footer">
+                <option value="off">None</option>
+                <option value="stats">Profile stats</option>
+                <option value="wave">Wave</option>
+              </select>
+            </div>
+          </div>
+
+          <fieldset class="toggles">
+            <legend>Profile contents</legend>
+            <label><input type="checkbox" id="username" checked /> Username</label>
+            <label><input type="checkbox" id="avatar" checked /> Picture</label>
+          </fieldset>
+
+          <fieldset class="toggles">
+            <legend>Card elements</legend>
+            <label><input type="checkbox" id="header" checked /> Title row</label>
+            <label><input type="checkbox" id="logo" checked /> Last.fm logo</label>
+            <label><input type="checkbox" id="art" checked /> Album art</label>
+            <label><input type="checkbox" id="time" checked /> Timestamps</label>
+          </fieldset>
+        </section>
+
+        <section class="preview-col" aria-label="Preview">
+          <div class="preview">
+            <p id="preview-empty">Enter a username</p>
+            <img id="preview" alt="Widget preview" hidden />
+          </div>
+          <p class="note">
+            GitHub proxies README images, so new scrobbles may take up to a few minutes to appear.
+          </p>
+        </section>
+      </div>
+
+      <section class="embed" aria-labelledby="embed-heading">
+        <h2 id="embed-heading">Embed</h2>
+
+        <div class="tabs" role="tablist">
+          <button role="tab" class="tab" data-tab="markdown" aria-selected="true">Markdown</button>
+          <button role="tab" class="tab" data-tab="linked" aria-selected="false">
+            Markdown + link
+          </button>
+          <button role="tab" class="tab" data-tab="html" aria-selected="false">HTML</button>
+          <button role="tab" class="tab" data-tab="adaptive" aria-selected="false">
+            Auto light/dark
+          </button>
+        </div>
+
+        <div class="snippet">
+          <pre><code id="snippet-out">Enter a username</code></pre>
+          <button class="copy" id="copy" disabled>Copy</button>
+        </div>
+
+        <details>
+          <summary>Image URL</summary>
+          <div class="snippet">
+            <pre><code id="url-out">-</code></pre>
+            <button class="copy" id="copy-url" disabled>Copy</button>
+          </div>
+        </details>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
