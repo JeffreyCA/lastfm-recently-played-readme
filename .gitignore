@@ -8,3 +8,4 @@ Thumbs.db
 
 # Scratch output from manual endpoint checks.
 *.svg
+headers.txt
