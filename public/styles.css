@@ -23,6 +23,45 @@ body {
   line-height: 1.55;
 }
 
+header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Sits on the title's line rather than under it, so it stays out of the form's
+   way while remaining the first thing above the fold. */
+.repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  margin-top: 4px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.repo-link:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.repo-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .repo-link span {
+    display: none;
+  }
+}
+
 h1 {
   margin: 0 0 6px;
   font-size: 1.75rem;
