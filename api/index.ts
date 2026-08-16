@@ -29,8 +29,22 @@ import { DEFAULT_WORKER_ORIGIN, translate } from './_translate.js';
  */
 const UPSTREAM_TIMEOUT_MS = 8000;
 
-/** A short TTL for the fallback card, so an outage clears as soon as it ends. */
+/** A short TTL for failure cards, so an outage clears as soon as it ends. */
 const FALLBACK_MAX_AGE_SECONDS = 10;
+
+/**
+ * The Worker renders its own failures as cards at HTTP 200, and marks them
+ * with an `err-` ETag. They are indistinguishable from a good card otherwise,
+ * so without this check a typo'd username - or a momentary Last.fm outage -
+ * would be pinned at the edge for the full TTL.
+ *
+ * A weak-validator prefix is admittedly a thin contract between the two
+ * services, but it is the only signal that survives, and being wrong about it
+ * costs a slightly long-lived error card rather than a broken one.
+ */
+function isErrorCard(etag: string | null): boolean {
+  return etag?.startsWith('W/"err-') ?? false;
+}
 
 /**
  * How long the CDN may keep serving the last good card if this function itself
@@ -121,9 +135,12 @@ export default {
       });
 
       if (upstream.status === 304) {
+        // A 304 confirms the cached card, which may itself be an error card.
+        const etag = upstream.headers.get('etag') ?? ifNoneMatch;
+        const failed = isErrorCard(etag);
         return new Response(null, {
           status: 304,
-          headers: svgHeaders(maxAgeSeconds, upstream.headers.get('etag'), true),
+          headers: svgHeaders(failed ? FALLBACK_MAX_AGE_SECONDS : maxAgeSeconds, etag, !failed),
         });
       }
 
@@ -141,9 +158,11 @@ export default {
       // a truncated SVG that has already committed to 200 - and a half-drawn
       // card is exactly the broken image this is all trying to avoid.
       const body = request.method === 'HEAD' ? null : await upstream.text();
+      const etag = upstream.headers.get('etag');
+      const failed = isErrorCard(etag);
       return new Response(body, {
         status: 200,
-        headers: svgHeaders(maxAgeSeconds, upstream.headers.get('etag'), true),
+        headers: svgHeaders(failed ? FALLBACK_MAX_AGE_SECONDS : maxAgeSeconds, etag, !failed),
       });
     } catch (err) {
       console.error('Upstream request failed', {

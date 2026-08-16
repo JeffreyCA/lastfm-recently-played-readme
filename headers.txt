@@ -1,0 +1,14 @@
+HTTP/1.1 200 OK
+Age: 0
+Cache-Control: public, max-age=180
+Content-Type: image/svg+xml; charset=utf-8
+Date: Sun, 16 Aug 2026 00:43:39 GMT
+Etag: W/"16jrv52tsq4ko"
+Server: Vercel
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Robots-Tag: noindex
+X-Vercel-Cache: MISS
+X-Vercel-Id: pdx1::cle1::rb5rs-1786841019499-f32061200cc0
+Transfer-Encoding: chunked
+

@@ -57,6 +57,20 @@ describe('proxy', () => {
     expect(await res.text()).toBe('');
   });
 
+  it("does not pin the Worker's error cards for a full TTL", async () => {
+    stubUpstream(
+      new Response(CARD, {
+        status: 200,
+        headers: { 'Content-Type': 'image/svg+xml; charset=utf-8', ETag: 'W/"err-abc"' },
+      }),
+    );
+
+    const res = await handler.fetch(get('user=zzz'));
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('cache-control')).toBe('public, max-age=10, s-maxage=10');
+  });
+
   it('answers 200 with a fallback card when the Worker fails', async () => {
     stubUpstream(new Response('boom', { status: 502 }));
 
