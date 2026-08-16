@@ -5,8 +5,6 @@ Check out [spotify-recently-played-readme](https://github.com/JeffreyCA/spotify-
 
 [![Try the interactive configurator](https://img.shields.io/badge/Try_the_interactive_configurator-D51007?style=for-the-badge&logo=lastdotfm&logoColor=white)](https://lastfm-recently-played.jeffreyca.workers.dev)
 
-Pick your options, preview the card, and copy/paste the snippet into your README.
-
 ---
 
 ## Getting started
@@ -40,8 +38,8 @@ Add parameters to the URL, e.g. `?user=JeffreyCA01&theme=light&count=3`.
 | `count` | How many tracks. A now-playing track counts as one | `5` | `1`-`10` |
 | `theme` | Colour scheme | `dark` | `dark`, `legacy`, `light`, `nord`, `catppuccin`, `transparent` |
 | `bg_color` | Background colour only. Text colours stay as the theme has them | theme's | hex digits, no `#` - e.g. `212121` |
-| `width` | Card width in pixels | `400` | `260`-`800` |
-| `radius` | Corner rounding | `10` | `0`-`24` |
+| `width` | Card width in pixels | `400` | `260`-`1000` |
+| `radius` | Corner rounding | `10` | `0`-`40` |
 | `art` | Album artwork | `1` | `1` / `0` |
 | `header` | The "Recently Played" row | `1` | `1` / `0` |
 | `logo` | Last.fm wordmark in the header | `1` | `1` / `0` |

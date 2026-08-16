@@ -159,8 +159,8 @@ function bool(raw: string | null, fallback: boolean): boolean {
 
 export const LIMITS = {
   count: { min: 1, max: 10, default: 5 },
-  width: { min: 260, max: 800, default: 400 },
-  radius: { min: 0, max: 24, default: 10 },
+  width: { min: 260, max: 1000, default: 400 },
+  radius: { min: 0, max: 40, default: 10 },
 } as const;
 
 export function parseOptions(params: URLSearchParams): WidgetOptions {

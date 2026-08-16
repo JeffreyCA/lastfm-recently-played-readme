@@ -43,7 +43,7 @@ export const TOTAL_BUDGET_MS = 8000;
 export const LASTFM_BUDGET_MS = 5000;
 
 /** Album art is decorative and fetched in parallel. */
-export const ART_BUDGET_MS = 3000;
+export const ART_BUDGET_MS = 4500;
 
 /** Below this, skip art entirely rather than risk blowing the budget. */
 export const MIN_ART_BUDGET_MS = 600;

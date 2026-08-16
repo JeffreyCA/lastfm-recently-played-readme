@@ -10,6 +10,14 @@ const USERNAME_RE = /^[a-zA-Z][a-zA-Z0-9_-]{1,29}$/;
 /** Mirrors parseHexColour on the server: hex digits only, no leading hash. */
 const HEX_RE = /^([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
+/**
+ * Prefilled so the page opens with a real card rather than an empty frame -
+ * the preview is the whole point of this page, and it cannot draw one without
+ * a username. `rj` is Last.fm's own example account (their first user), so it
+ * is public, always populated, and not anyone's private listening.
+ */
+const SAMPLE_USER = 'rj';
+
 const DEFAULTS = {
   theme: 'dark',
   bg_color: '',
@@ -250,6 +258,13 @@ for (const tab of document.querySelectorAll('.tab')) {
 out.copy.addEventListener('click', () => copyText(out.snippet.textContent, out.copy));
 out.copyUrl.addEventListener('click', () => copyText(out.url.textContent, out.copyUrl));
 
+// The sample username is there to be replaced, so selecting it on first focus
+// saves clearing the field by hand. Only while it is untouched - once someone
+// has typed their own name, re-focusing should place the caret as usual.
+controls.user.addEventListener('focus', () => {
+  if (controls.user.value === SAMPLE_USER) controls.user.select();
+});
+
 out.preview.addEventListener('error', () => {
   out.preview.hidden = true;
   out.previewEmpty.hidden = false;
@@ -259,7 +274,7 @@ out.preview.addEventListener('error', () => {
 // Deep-link support: /?user=foo&theme=nord prefills the form.
 (function hydrateFromQuery() {
   const q = new URLSearchParams(location.search);
-  if (q.has('user')) controls.user.value = q.get('user');
+  controls.user.value = q.has('user') ? q.get('user') : SAMPLE_USER;
   if (q.has('theme')) controls.theme.value = q.get('theme');
   if (q.has('count')) controls.count.value = q.get('count');
   if (q.has('width')) controls.width.value = q.get('width');
@@ -279,4 +294,27 @@ out.preview.addEventListener('error', () => {
     if (q.has(name)) controls[name].checked = bool(q.get(name));
   }
   render();
+
+  focusUsernameIfHelpful(q.has('user'));
 })();
+
+/**
+ * Puts the caret in the username field on load, since replacing the sample name
+ * is the first thing anyone does here. Skipped in the two cases where it would
+ * be a nuisance rather than a shortcut:
+ *
+ * - Arriving by deep link, where the form is already the configuration someone
+ *   wanted to see, and selecting the username invites wiping it by mistake.
+ * - Touch devices, where focusing a text input raises the on-screen keyboard
+ *   over the page before anyone has asked to type.
+ *
+ * `preventScroll` keeps the page at the top: the field is above the fold, and
+ * scrolling to it on a short viewport would hide the heading for no reason.
+ */
+function focusUsernameIfHelpful(deepLinked) {
+  if (deepLinked) return;
+  if (window.matchMedia?.('(pointer: coarse)').matches) return;
+
+  controls.user.focus({ preventScroll: true });
+  controls.user.select();
+}
