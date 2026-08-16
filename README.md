@@ -40,8 +40,14 @@ Add parameters to the URL, e.g. `?user=JeffreyCA01&theme=light&count=3`.
 | --- | --- | --- | --- |
 | `user` | Whose scrobbles to show | *required* | Last.fm username |
 | `count` | How many tracks. A now-playing track counts as one | `5` | `1`-`10` |
-| `theme` | Colour scheme | `dark` | `dark`, `legacy`, `light`, `nord`, `catppuccin`, `transparent` |
-| `bg_color` | Background colour only. Text colours stay as the theme has them | theme's | hex digits, no `#` - e.g. `212121` |
+| `theme` | Color scheme | `dark` | `dark`, `legacy`, `light`, `dracula`, `tokyonight`, `nord`, `catppuccin`, `transparent` |
+| `bg_color` | Card background | theme's | hex digits, no `#` - e.g. `212121` |
+| `text_color` | Track titles. Dividers, borders and placeholders follow it | theme's | hex digits, no `#` |
+| `artist_color` | The artist line | theme's | hex digits, no `#` |
+| `meta_color` | Timestamps, the footer and the stats labels | theme's | hex digits, no `#` |
+| `accent_color` | The now-playing bars, "Scrobbling now", and title hover | theme's | hex digits, no `#` |
+| `loved_color` | The loved-track heart | theme's | hex digits, no `#` |
+| `logo_color` | The Last.fm wordmark | `d51007` | hex digits, no `#` |
 | `width` | Card width in pixels | `400` | `260`-`1000` |
 | `radius` | Corner rounding | `10` | `0`-`40` |
 | `art` | Album artwork | `1` | `1` / `0` |
@@ -56,6 +62,12 @@ Add parameters to the URL, e.g. `?user=JeffreyCA01&theme=light&count=3`.
 | `loved` | Where to mark tracks you've hearted | `time` | `off`, `between`, `between-all`, `title`, `time` |
 
 Booleans also accept `true`/`false`, `yes`/`no`, `on`/`off`. Numbers outside their range are clamped rather than rejected.
+
+### Colors
+
+Every color takes 3, 4, 6 or 8 hex digits (without leading `#`) - 4 and 8 include alpha.
+
+`bg_color` is safe on its own: the card picks readable text for whatever background you give it, so `?bg_color=ffffff` on the dark theme comes out dark-on-white rather than white-on-white. Set `text_color` to choose for yourself.
 
 ### Loved tracks
 

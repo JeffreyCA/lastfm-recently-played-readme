@@ -14,6 +14,12 @@ npx wrangler secret put LASTFM_API_KEY   # production key; never in wrangler.jso
 
 Pushing to `main` runs typecheck + tests in GitHub Actions; Cloudflare Workers Builds deploys.
 
+## Conventions
+
+American spellings throughout - code, comments, docs and UI. The URL parameters
+are `bg_color`, `text_color` and so on, and prose that says "color" beside them
+reads as a different thing.
+
 ## What the rendering context forces
 
 GitHub renders the card inside an `<img>`, proxied by Camo. Almost every design decision follows from that:
@@ -27,10 +33,24 @@ GitHub renders the card inside an `<img>`, proxied by Camo. Almost every design 
 
 `profile` (`header` / `footer-left` / `footer-right` / `off`) says **where** your identity goes; `username` and `avatar` say **what's in it**. Folding placement into content is what once made the `avatar` toggle look header-only. The footer holds exactly **one** thing - when `profile` is in the footer, `footer` is ignored rather than stacked underneath.
 
+## Configurator
+
+`public/` is plain HTML, CSS and JS with no build step, and the page's whole job is to assemble a URL string.
+
+- **Only values that differ from the theme reach the URL.** The color fields are filled in with whatever the card is using, so they can be copied out, and a field equal to its theme value is treated as unset. Resetting writes the theme's value back.
+- **Color swatches are bound to `change`, not `input`.** A native picker fires continuously while dragging and every preview is a request to the Worker.
+- `THEME_COLORS` mirrors each theme's settable colors from `render/themes.ts`. Update both together, or an untouched picker shows a color the card isn't using.
+- The form is a fixed 500px and the preview takes the remaining width, because the card can be up to 1000px wide and the form cannot usefully use more. Card height changes with track count, but the preview is in its own column, so it never reflows the form.
+
 ## Gotchas
 
 - **Every string from Last.fm goes through `escapeXml`.** One bare `&` breaks the entire image, silently, with nothing in any log. This is the most common way to ship a broken card.
-- **Caller-supplied colours are validated, not escaped.** `bg_color` is interpolated into an SVG attribute, so `parseHexColour` allowlists a strict hex shape and returns null otherwise.
+- **Caller-supplied colors are validated, not escaped.** Every color parameter is interpolated into an SVG attribute, so `parseHexColor` allowlists a strict hex shape and returns null otherwise. Any new color parameter must go through it - this is a security boundary, not a formatting preference.
+- **Most of `Theme` is derived, not chosen.** `bg_color`, `text_color`, `artist_color`, `meta_color`, `accent_color` and `loved_color` are the only settable palette colors; the dividers, borders and placeholders are mixes between the text color and the background (`render/color.ts`), using ratios measured from the presets. They are named as **roles, not elements** - `meta` is the timestamps, the footer and the stats labels together. `resolveTheme` returns the preset object itself when nothing is overridden, and a test asserts that by identity, so existing cards cannot drift.
+- **`logo_color` is not part of `Theme`.** The wordmark is a trademark, so it defaults to Last.fm's red in every palette and lives as an option rather than a theme field.
+- **`artist` and `meta` are two controls on purpose.** Deriving one from the other is within 6/255 on the neutral themes and out by 21 and 41 on `nord` and `catppuccin`, which pair a hued artist line with a neutral grey timestamp - the derivation turns that grey blue or purple. They were merged into one `muted_color` and it had to be undone; the configurator links them by default instead, which is a convenience in that page only. The URL always carries both colors in full, so the Worker has no notion of linking and a hand-edited URL cannot reach a state the form cannot show.
+- **`loved` is separate from `accent` only because of `nord`.** Its accent is blue and a blue heart reads as something else; the other five presets set the two to the same color. Don't "simplify" it away.
+- **A background can make a theme unreadable.** `?bg_color=ffffff` on `dark` once painted near-white text onto white. `resolveTheme` now borrows the inks from whichever built-in palette suits the background when contrast fails. Changing the derivation ratios changes every custom card at once and only in the rendering, so the tests pin them.
 - **`isAllowedArtUrl` is a security boundary.** Without it the endpoint is an open proxy. The real CDN host is `lastfm-img.freetls.fastly.net` - note the `-img`; guessing it wrong fails silently and every cover falls back to a placeholder. Art fetches use `redirect: 'manual'`, since the allowlist only validates the URL we start with; a 3xx then fails the `res.ok` check.
 - **Workers only implement `redirect: 'follow'` and `'manual'`.** `'error'` throws a `TypeError` on the edge, and local `wrangler dev` does *not* reproduce it - this shipped once and broke every cover in production while looking perfect locally. Verify subrequest behaviour against a real deploy or `wrangler dev --remote`, not just local.
 - **`user.getRecentTracks` returns `track` as a bare object, not an array, for a single result.**
@@ -52,8 +72,10 @@ GitHub renders the card inside an `<img>`, proxied by Camo. Almost every design 
 
 ## Testing
 
-Deliberately minimal (8 tests) and it should stay that way while the design is still moving. It covers what fails *silently*: well-formed and escaped SVG, untrusted input (track URLs, art hosts, usernames), the upstream response shapes, and the HTTP contract.
+Deliberately minimal and it should stay that way while the design is still moving. It covers what fails *silently*: well-formed and escaped SVG, untrusted input (track URLs, art hosts, usernames), the upstream response shapes, the HTTP contract, and the color maths - a wrong mix ratio or a dropped contrast check produces a card that renders perfectly and just looks wrong.
 
 **Don't add pixel-position assertions.** They were tried; every layout change broke them and the test was wrong every time. Verify visual work by rendering against `npm run dev` and looking at it.
+
+The color tests are the exception that proves the rule: they assert ratios and contrast, never positions. Their tolerances are set from measured error against the presets (worst case 22/255, in `meta` for `nord` and `border` for `light`) rather than picked to make the suite pass - a tolerance tightened past the real spread will fail on a theme nobody touched.
 
 Static assets aren't served through `SELF.fetch` in vitest-pool-workers - the runtime handles them before the Worker - so the configurator is only verifiable against a real dev server.

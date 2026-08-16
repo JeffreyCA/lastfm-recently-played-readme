@@ -23,117 +23,298 @@
     <main>
       <div class="split">
         <section aria-label="Options">
-          <div class="field">
-            <div class="field-head">
-              <label for="user">Last.fm username</label>
-              <span class="error" id="user-error" role="alert"></span>
+          <fieldset class="group">
+            <legend>Card</legend>
+            <div class="group-grid">
+              <div class="field span-2">
+                <div class="field-head">
+                  <label for="user">Last.fm username</label>
+                  <span class="error" id="user-error" role="alert"></span>
+                </div>
+                <input
+                  id="user"
+                  type="text"
+                  placeholder="e.g. rj"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                />
+              </div>
+
+              <div class="field">
+                <label for="theme">Theme</label>
+                <select id="theme">
+                  <option value="dark">Dark</option>
+                  <option value="legacy">Legacy</option>
+                  <option value="light">Light</option>
+                  <option value="dracula">Dracula</option>
+                  <option value="tokyonight">Tokyo Night</option>
+                  <option value="nord">Nord</option>
+                  <option value="catppuccin">Catppuccin</option>
+                  <option value="transparent">Transparent</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="loved">Loved tracks</label>
+                <select id="loved">
+                  <option value="between">Left of track name</option>
+                  <option value="between-all">Left of name, greyed if not loved</option>
+                  <option value="title">Right of track name</option>
+                  <option value="time" selected>Left of timestamp</option>
+                  <option value="off">Hidden</option>
+                </select>
+              </div>
+
+              <!-- Collapsed by default: five rows that most people never touch,
+                   and leaving them open pushed everything below them off the
+                   first screen. The badge is what makes collapsing safe - a
+                   customised color would otherwise be invisible once closed. -->
+              <details class="colors span-2" id="colors-details">
+                <summary>
+                  Customize colors
+                  <span class="badge" id="color-count" hidden></span>
+                </summary>
+
+                <p class="hint">
+                  Each follows the theme until you set it. Dividers, borders and placeholders
+                  are derived from the text color.
+                </p>
+
+                <div class="color-row" data-color="bg-color">
+                  <label for="bg-color">Background</label>
+                  <span class="swatch-wrap">
+                    <input type="color" id="bg-color-swatch" aria-label="Background color picker" />
+                  </span>
+                  <input
+                    id="bg-color"
+                    type="text"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                  />
+                  <button type="button" class="reset" data-reset="bg-color" title="Reset to theme">
+                    Reset
+                  </button>
+                </div>
+
+                <div class="color-row" data-color="text-color">
+                  <label for="text-color">Track title</label>
+                  <span class="swatch-wrap">
+                    <input type="color" id="text-color-swatch" aria-label="Track title color picker" />
+                  </span>
+                  <input
+                    id="text-color"
+                    type="text"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                  />
+                  <button type="button" class="reset" data-reset="text-color" title="Reset to theme">
+                    Reset
+                  </button>
+                </div>
+
+                <div class="linked-pair" id="artist-meta-pair">
+                  <div class="color-row" data-color="artist-color">
+                    <label for="artist-color">Artist</label>
+                    <span class="swatch-wrap">
+                      <input type="color" id="artist-color-swatch" aria-label="Artist color picker" />
+                    </span>
+                    <input
+                      id="artist-color"
+                      type="text"
+                      autocomplete="off"
+                      autocapitalize="off"
+                      spellcheck="false"
+                    />
+                    <button
+                      type="button"
+                      class="reset"
+                      data-reset="artist-color"
+                      title="Reset to theme"
+                    >
+                      Reset
+                    </button>
+                  </div>
+
+                  <!-- The two are a pair in the neutral themes and deliberately
+                       unalike in nord and catppuccin, so neither one control nor
+                       two unrelated controls is right on its own. Linked by
+                       default, because matching is the common case. -->
+                  <button
+                    type="button"
+                    id="link-artist-meta"
+                    class="link-toggle"
+                    aria-pressed="true"
+                    aria-label="Derive timestamp color from artist color"
+                    title="Derive timestamp color from artist color"
+                  >
+                    <span class="link-arm link-arm-top"></span>
+                    <span class="link-icon">
+                      <svg viewBox="0 0 16 16" aria-hidden="true">
+                        <path class="link-chain" d="M6.4 9.6a3 3 0 0 1 0-4.24l1.9-1.9a3 3 0 0 1 4.24 4.24l-1 1" />
+                        <path class="link-chain" d="M9.6 6.4a3 3 0 0 1 0 4.24l-1.9 1.9a3 3 0 0 1-4.24-4.24l1-1" />
+                        <path class="link-break" d="M3 13 13 3" />
+                      </svg>
+                    </span>
+                    <span class="link-arm link-arm-bottom"></span>
+                  </button>
+
+                  <div class="color-row" data-color="meta-color">
+                    <label for="meta-color">Timestamp</label>
+                    <span class="swatch-wrap">
+                      <input type="color" id="meta-color-swatch" aria-label="Timestamp color picker" />
+                    </span>
+                    <input
+                      id="meta-color"
+                      type="text"
+                      autocomplete="off"
+                      autocapitalize="off"
+                      spellcheck="false"
+                    />
+                    <button type="button" class="reset" data-reset="meta-color" title="Reset to theme">
+                      Reset
+                    </button>
+                  </div>
+                </div>
+
+                <div class="color-row" data-color="accent-color">
+                  <label for="accent-color">Now playing</label>
+                  <span class="swatch-wrap">
+                    <input
+                      type="color"
+                      id="accent-color-swatch"
+                      aria-label="Now playing color picker"
+                    />
+                  </span>
+                  <input
+                    id="accent-color"
+                    type="text"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                  />
+                  <button
+                    type="button"
+                    class="reset"
+                    data-reset="accent-color"
+                    title="Reset to theme"
+                  >
+                    Reset
+                  </button>
+                </div>
+
+                <div class="color-row" data-color="loved-color">
+                  <label for="loved-color">Loved heart</label>
+                  <span class="swatch-wrap">
+                    <input
+                      type="color"
+                      id="loved-color-swatch"
+                      aria-label="Loved heart color picker"
+                    />
+                  </span>
+                  <input
+                    id="loved-color"
+                    type="text"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                  />
+                  <button
+                    type="button"
+                    class="reset"
+                    data-reset="loved-color"
+                    title="Reset to theme"
+                  >
+                    Reset
+                  </button>
+                </div>
+
+                <div class="color-row" data-color="logo-color">
+                  <label for="logo-color">Last.fm logo</label>
+                  <span class="swatch-wrap">
+                    <input type="color" id="logo-color-swatch" aria-label="Last.fm logo color picker" />
+                  </span>
+                  <input
+                    id="logo-color"
+                    type="text"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                  />
+                  <button type="button" class="reset" data-reset="logo-color" title="Reset to brand red">
+                    Reset
+                  </button>
+                </div>
+
+                <p class="color-status" id="color-status" role="status"></p>
+              </details>
             </div>
-            <input
-              id="user"
-              type="text"
-              placeholder="e.g. rj"
-              autocomplete="off"
-              autocapitalize="off"
-              spellcheck="false"
-            />
-          </div>
-
-          <div class="field">
-            <label for="theme">Theme</label>
-            <select id="theme">
-              <option value="dark">Dark</option>
-              <option value="legacy">Legacy</option>
-              <option value="light">Light</option>
-              <option value="nord">Nord</option>
-              <option value="catppuccin">Catppuccin</option>
-              <option value="transparent">Transparent</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <div class="field-head">
-              <label for="bg-color">Background colour</label>
-              <span class="error" id="bg-color-error" role="alert"></span>
-            </div>
-            <input
-              id="bg-color"
-              type="text"
-              placeholder="theme default, e.g. 212121"
-              autocomplete="off"
-              autocapitalize="off"
-              spellcheck="false"
-            />
-          </div>
-
-          <div class="field">
-            <label for="loved">Loved tracks heart indicator</label>
-            <select id="loved">
-              <option value="between">Left of track name</option>
-              <option value="between-all">Left of track name, greyed if not loved</option>
-              <option value="title">Right of track name</option>
-              <option value="time" selected>Left of timestamp</option>
-              <option value="off">Hidden</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="stats">Profile stats</label>
-            <select id="stats">
-              <option value="off">Hidden</option>
-              <option value="block">Columns</option>
-              <option value="block-center">Columns, centred</option>
-              <option value="compact">One line</option>
-            </select>
-          </div>
-
-          <div class="row">
-            <div class="field">
-              <label for="count">Tracks <output id="count-out">5</output></label>
-              <input id="count" type="range" min="1" max="10" value="5" />
-            </div>
-            <div class="field">
-              <label for="width">Width <output id="width-out">400</output>px</label>
-              <input id="width" type="range" min="260" max="1000" step="10" value="400" />
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="radius">Corner radius <output id="radius-out">10</output>px</label>
-            <input id="radius" type="range" min="0" max="40" value="10" />
-          </div>
-
-          <div class="row">
-            <div class="field">
-              <label for="profile">Show profile</label>
-              <select id="profile">
-                <option value="header">Header</option>
-                <option value="footer-left">Footer (left)</option>
-                <option value="footer-right">Footer (right)</option>
-                <option value="off">Hidden</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="footer">Footer extras</label>
-              <select id="footer">
-                <option value="off">None</option>
-                <option value="stats">Profile stats</option>
-                <option value="wave">Wave</option>
-              </select>
-            </div>
-          </div>
-
-          <fieldset class="toggles">
-            <legend>Profile contents</legend>
-            <label><input type="checkbox" id="username" checked /> Username</label>
-            <label><input type="checkbox" id="avatar" checked /> Picture</label>
           </fieldset>
 
-          <fieldset class="toggles">
-            <legend>Card elements</legend>
-            <label><input type="checkbox" id="header" checked /> Title row</label>
-            <label><input type="checkbox" id="logo" checked /> Last.fm logo</label>
-            <label><input type="checkbox" id="art" checked /> Album art</label>
-            <label><input type="checkbox" id="time" checked /> Timestamps</label>
+          <fieldset class="group">
+            <legend>Size</legend>
+            <div class="group-grid">
+              <div class="field">
+                <label for="count">Tracks <output id="count-out">5</output></label>
+                <input id="count" type="range" min="1" max="10" value="5" />
+              </div>
+              <div class="field">
+                <label for="width">Width <output id="width-out">400</output>px</label>
+                <input id="width" type="range" min="260" max="1000" step="10" value="400" />
+              </div>
+              <div class="field span-2">
+                <label for="radius">Corner radius <output id="radius-out">10</output>px</label>
+                <input id="radius" type="range" min="0" max="40" value="10" />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="group">
+            <legend>Contents</legend>
+            <div class="group-grid">
+              <div class="field">
+                <label for="profile">Show profile</label>
+                <select id="profile">
+                  <option value="header">Header</option>
+                  <option value="footer-left">Footer (left)</option>
+                  <option value="footer-right">Footer (right)</option>
+                  <option value="off">Hidden</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="footer">Footer extras</label>
+                <select id="footer">
+                  <option value="off">None</option>
+                  <option value="stats">Profile stats</option>
+                  <option value="wave">Wave</option>
+                </select>
+              </div>
+              <div class="field span-2">
+                <label for="stats">Profile stats</label>
+                <select id="stats">
+                  <option value="off">Hidden</option>
+                  <option value="block">Columns</option>
+                  <option value="block-center">Columns, centred</option>
+                  <option value="compact">One line</option>
+                </select>
+              </div>
+
+              <fieldset class="toggles">
+                <legend>Profile shows</legend>
+                <label><input type="checkbox" id="username" checked /> Username</label>
+                <label><input type="checkbox" id="avatar" checked /> Picture</label>
+              </fieldset>
+
+              <fieldset class="toggles">
+                <legend>Card elements</legend>
+                <label><input type="checkbox" id="header" checked /> Title row</label>
+                <label><input type="checkbox" id="logo" checked /> Last.fm logo</label>
+                <label><input type="checkbox" id="art" checked /> Album art</label>
+                <label><input type="checkbox" id="time" checked /> Timestamps</label>
+              </fieldset>
+            </div>
           </fieldset>
         </section>
 
@@ -142,6 +323,7 @@
             <p id="preview-empty">Enter a username</p>
             <img id="preview" alt="Widget preview" hidden />
           </div>
+          <p class="preview-scale" id="preview-scale" hidden></p>
           <p class="note">
             GitHub proxies README images, so new scrobbles may take up to a few minutes to appear.
           </p>

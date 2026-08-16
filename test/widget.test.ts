@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { isAllowedArtUrl } from '../src/art';
 import { parseRecentTracks } from '../src/lastfm';
-import { OptionsError, parseHexColour, parseOptions } from '../src/options';
+import { OptionsError, parseHexColor, parseOptions } from '../src/options';
 import { relativeTime, renderCard, safeTrackUrl } from '../src/render/card';
 import { THEME_NAMES } from '../src/render/themes';
 import type { Track } from '../src/lastfm';
@@ -30,6 +30,12 @@ const options: WidgetOptions = {
   stats: 'off',
   footer: 'off',
   bgColor: null,
+  textColor: null,
+  artistColor: null,
+  metaColor: null,
+  accentColor: null,
+  lovedColor: null,
+  logoColor: null,
   loved: 'off',
 };
 
@@ -140,7 +146,7 @@ describe('untrusted input', () => {
     expect(parseOptions(new URLSearchParams('user=rj&count=999')).count).toBe(10);
   });
 
-  it('only accepts strict hex colours for the background', () => {
+  it('only accepts strict hex colors for the background', () => {
     for (const [input, expected] of [
       ['1a2b3c', '#1a2b3c'],
       ['ABC', '#aabbcc'],
@@ -155,8 +161,45 @@ describe('untrusted input', () => {
       ['" onload="alert(1)', null],
       ['', null],
     ] as const) {
-      expect(parseHexColour(input), input).toBe(expected);
+      expect(parseHexColor(input), input).toBe(expected);
     }
+  });
+
+  it('routes every color parameter through the same allowlist', () => {
+    // They are interpolated into SVG attributes, so a parameter that skipped
+    // validation would be an injection hole rather than a styling bug.
+    const params = new URLSearchParams({ user: 'rj' });
+    for (const name of [
+      'bg_color',
+      'text_color',
+      'artist_color',
+      'meta_color',
+      'accent_color',
+      'loved_color',
+      'logo_color',
+    ]) {
+      params.set(name, '" onload="alert(1)');
+    }
+
+    const options = parseOptions(params);
+    for (const value of [
+      options.bgColor,
+      options.textColor,
+      options.artistColor,
+      options.metaColor,
+      options.accentColor,
+      options.lovedColor,
+      options.logoColor,
+    ]) {
+      expect(value).toBeNull();
+    }
+  });
+
+  it('leaves the wordmark on the brand red unless asked otherwise', () => {
+    expect(parseOptions(new URLSearchParams('user=rj')).logoColor).toBeNull();
+    expect(parseOptions(new URLSearchParams('user=rj&logo_color=00ff00')).logoColor).toBe(
+      '#00ff00',
+    );
   });
 });
 

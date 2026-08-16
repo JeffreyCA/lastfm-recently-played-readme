@@ -34,7 +34,7 @@ export function waveDecor(
   y: number,
   width: number,
   height: number,
-  colour: string,
+  color: string,
 ): string {
   const cols = Math.max(28, Math.min(90, Math.round(width / 6.5)));
   const midY = y + height / 2;
@@ -73,7 +73,7 @@ export function waveDecor(
     .map(([opacity, dots]) => `<path opacity="${opacity}" d="${dots.join('')}"/>`)
     .join('');
 
-  return `<g stroke="${colour}" stroke-width="1.7" stroke-linecap="round" fill="none">${groups}</g>`;
+  return `<g stroke="${color}" stroke-width="1.7" stroke-linecap="round" fill="none">${groups}</g>`;
 }
 
 function round1(n: number): number {
