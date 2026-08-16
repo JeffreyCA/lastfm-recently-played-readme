@@ -1,4 +1,9 @@
-import { DEFAULT_WORKER_ORIGIN, translate } from './_translate.ts';
+// Imported with a `.js` extension, which is the ESM convention TypeScript
+// expects: the specifier names the file as it will exist at runtime, and TS
+// resolves it back to `_translate.ts` when type checking. A `.ts` extension
+// here type checks but is emitted unchanged, leaving the deployed function
+// importing a file that does not exist.
+import { DEFAULT_WORKER_ORIGIN, translate } from './_translate.js';
 
 /**
  * The old Vercel endpoint, kept alive as a shim.
