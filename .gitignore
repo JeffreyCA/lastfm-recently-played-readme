@@ -13,3 +13,6 @@ Thumbs.db
 # Local agent tooling (Cloudflare skills), not part of the Worker.
 .agents/
 skills-lock.json
+commit-msg.txt
+msg.tmp
+

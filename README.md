@@ -40,8 +40,14 @@ Add parameters to the URL, e.g. `?user=JeffreyCA01&theme=light&count=3`.
 | --- | --- | --- | --- |
 | `user` | Whose scrobbles to show | *required* | Last.fm username |
 | `count` | How many tracks. A now-playing track counts as one | `5` | `1`-`10` |
-| `theme` | Colour scheme | `dark` | `dark`, `legacy`, `light`, `nord`, `catppuccin`, `transparent` |
-| `bg_color` | Background colour only. Text colours stay as the theme has them | theme's | hex digits, no `#` - e.g. `212121` |
+| `theme` | Color scheme | `dark` | `dark`, `legacy`, `light`, `nord`, `catppuccin`, `transparent` |
+| `bg_color` | Card background | theme's | hex digits, no `#` - e.g. `212121` |
+| `text_color` | Track titles. Dividers, borders and placeholders follow it | theme's | hex digits, no `#` |
+| `artist_color` | The artist line | theme's | hex digits, no `#` |
+| `meta_color` | Timestamps, the footer and the stats labels | theme's | hex digits, no `#` |
+| `accent_color` | The now-playing bars, "Scrobbling now", and title hover | theme's | hex digits, no `#` |
+| `loved_color` | The loved-track heart | theme's | hex digits, no `#` |
+| `logo_color` | The Last.fm wordmark | `d51007` | hex digits, no `#` |
 | `width` | Card width in pixels | `400` | `260`-`1000` |
 | `radius` | Corner rounding | `10` | `0`-`40` |
 | `art` | Album artwork | `1` | `1` / `0` |
@@ -56,6 +62,22 @@ Add parameters to the URL, e.g. `?user=JeffreyCA01&theme=light&count=3`.
 | `loved` | Where to mark tracks you've hearted | `time` | `off`, `between`, `between-all`, `title`, `time` |
 
 Booleans also accept `true`/`false`, `yes`/`no`, `on`/`off`. Numbers outside their range are clamped rather than rejected.
+
+### Colors
+
+Each color parameter layers on top of the chosen theme and is optional - anything you leave out keeps following the theme, so a URL only ever carries what you actually changed. All of them take 3, 4, 6 or 8 hex digits with no leading `#` (4 and 8 include alpha).
+
+These are roles rather than single elements - `meta_color` covers the timestamps, the footer and the stats labels together - and everything else the card draws is derived from them: the row dividers, the artwork placeholders, the muted heart. Those are relationships rather than decisions, and mixing `text_color` with `bg_color` reproduces the built-in themes' own supporting colors closely.
+
+`artist_color` and `meta_color` look like one control and are not. In the neutral themes the timestamp is the artist color faded a little further, but `nord` and `catppuccin` deliberately pair a colored artist line with a neutral grey timestamp. The configurator links the two by default and lets you break the link.
+
+`loved_color` is separate from `accent_color` for the same kind of reason: `nord`'s accent is blue, and a blue heart reads as something else entirely. In the other themes the two are the same color.
+
+`logo_color` is the exception to all of it: the wordmark is Last.fm's trademark, so it stays their red in every theme unless you deliberately change it.
+
+If a background is picked that the theme's text can't be read against, the card takes its text colors from whichever built-in palette suits that background instead of rendering something illegible. So `?bg_color=ffffff` on the dark theme gives dark text, not white-on-white. Set `text_color` yourself to override that.
+
+The [configurator](https://lastfm-recently-played.jeffreyca.workers.dev) has a picker for each one and shows the text contrast as you go.
 
 ### Loved tracks
 

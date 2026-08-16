@@ -58,7 +58,7 @@ export function footerProfileAlign(p: ProfilePosition): 'left' | 'right' | null 
 }
 
 /**
- * A caller-supplied background colour.
+ * A caller-supplied background color.
  *
  * Validated to a strict hex form rather than escaped, because this value is
  * interpolated into an SVG attribute: an allowlist is the only way to be sure
@@ -69,7 +69,7 @@ export function footerProfileAlign(p: ProfilePosition): 'left' | 'right' | null 
  * where everything from the `#` is treated as a page anchor and never reaches
  * the server - which looks like the parameter being ignored.
  */
-export function parseHexColour(raw: string | null): string | null {
+export function parseHexColor(raw: string | null): string | null {
   const value = (raw ?? '').trim().toLowerCase();
   if (!/^([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/.test(value)) return null;
   if (value.length <= 4) {
@@ -124,6 +124,18 @@ export interface WidgetOptions {
   footer: FooterMode;
   /** Overrides the theme background, or null to keep it. */
   bgColor: string | null;
+  /** Overrides the theme's title color; the supporting greys follow it. */
+  textColor: string | null;
+  /** Overrides the artist line. */
+  artistColor: string | null;
+  /** Overrides timestamps, the footer and the stats labels. */
+  metaColor: string | null;
+  /** Overrides the now-playing accent and the title hover color. */
+  accentColor: string | null;
+  /** Overrides the loved-track heart. */
+  lovedColor: string | null;
+  /** Overrides the Last.fm wordmark, which is otherwise their brand red. */
+  logoColor: string | null;
   /** Where loved-track hearts are drawn. */
   loved: LovedMode;
 }
@@ -196,6 +208,14 @@ export function parseOptions(params: URLSearchParams): WidgetOptions {
     avatar: bool(params.get('avatar'), true),
     stats: parseStats(params.get('stats')),
     footer: parseFooter(params.get('footer')),
-    bgColor: parseHexColour(params.get('bg_color')),
+    bgColor: parseHexColor(params.get('bg_color')),
+    // All colors go through the same allowlist. These are interpolated into
+    // SVG attributes, so validation - not escaping - is what makes them safe.
+    textColor: parseHexColor(params.get('text_color')),
+    artistColor: parseHexColor(params.get('artist_color')),
+    metaColor: parseHexColor(params.get('meta_color')),
+    accentColor: parseHexColor(params.get('accent_color')),
+    lovedColor: parseHexColor(params.get('loved_color')),
+    logoColor: parseHexColor(params.get('logo_color')),
   };
 }

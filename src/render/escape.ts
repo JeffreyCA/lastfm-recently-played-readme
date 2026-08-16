@@ -28,7 +28,7 @@ export function escapeXml(input: string): string {
 /**
  * Escapes a string for safe use inside an SVG <style> block.
  * Style content is CDATA-ish and is not XML-escaped by the parser, so a stray
- * `</style>` would break out. We only ever emit colour values here, but this
+ * `</style>` would break out. We only ever emit color values here, but this
  * keeps the invariant enforced rather than assumed.
  */
 export function escapeCss(input: string): string {

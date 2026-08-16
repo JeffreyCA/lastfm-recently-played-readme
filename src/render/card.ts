@@ -255,8 +255,8 @@ function link(href: string, body: string, className: string, label?: string): st
 }
 
 /** Hairline rule spanning the content width, centred on `y`. */
-function rule(y: number, width: number, colour: string): string {
-  return `<rect x="${PAD_X}" y="${round(y - 0.5)}" width="${width - PAD_X * 2}" height="1" fill="${colour}"/>`;
+function rule(y: number, width: number, color: string): string {
+  return `<rect x="${PAD_X}" y="${round(y - 0.5)}" width="${width - PAD_X * 2}" height="1" fill="${color}"/>`;
 }
 
 function round(n: number): number {
@@ -267,14 +267,14 @@ function round(n: number): number {
  * Three bars, matching the icon Last.fm uses on its own site. The staggered
  * delays keep them from moving as one block.
  */
-function equaliser(x: number, baseline: number, colour: string, idPrefix: string): string {
+function equaliser(x: number, baseline: number, color: string, idPrefix: string): string {
   const delays = [0, 300, 150];
   const bars = delays
     .map((delay, i) => {
       const bx = x + i * (EQ_BAR_W + EQ_BAR_GAP);
       return (
         `<rect class="${idPrefix}-eq" x="${round(bx)}" y="${round(baseline - EQ_H)}"` +
-        ` width="${EQ_BAR_W}" height="${EQ_H}" rx="1.5" fill="${colour}" style="animation-delay:${delay}ms"/>`
+        ` width="${EQ_BAR_W}" height="${EQ_H}" rx="1.5" fill="${color}" style="animation-delay:${delay}ms"/>`
       );
     })
     .join('');
@@ -410,7 +410,7 @@ function renderHeader(ctx: Ctx, baseline: number, avatarImage: string | null): s
     parts.push(
       link(
         ctx.profileHref,
-        lastfmLogo(PAD_X, baseline, LOGO_H, LASTFM_RED, `${idPrefix}-g`),
+        lastfmLogo(PAD_X, baseline, LOGO_H, options.logoColor ?? LASTFM_RED, `${idPrefix}-g`),
         `${idPrefix}-a`,
         `${options.user} on Last.fm`,
       ),
@@ -730,12 +730,12 @@ function renderStyle(ctx: Ctx): string {
     `.${idPrefix}-eq{transform-box:fill-box;transform-origin:bottom;animation:${idPrefix}-bounce 900ms ease-in-out infinite alternate}` +
     `@keyframes ${idPrefix}-bounce{from{transform:scaleY(0.22)}to{transform:scaleY(1)}}` +
     // Hover resolves only where the SVG is interactive; in an <img> (i.e. on
-    // GitHub) these rules are inert and the card renders in its base colours.
+    // GitHub) these rules are inert and the card renders in its base colors.
     `.${idPrefix}-a{cursor:pointer}` +
     `.${idPrefix}-t,.${idPrefix}-u{transition:fill 180ms ease-in-out}` +
     `.${idPrefix}-g{transition:opacity 180ms ease-in-out}` +
     `.${idPrefix}-a:hover .${idPrefix}-t,.${idPrefix}-a:hover .${idPrefix}-u{fill:${theme.titleHover}}` +
-    // The wordmark fades rather than recolouring: repainting a brand mark
+    // The wordmark fades rather than recoloring: repainting a brand mark
     // would misrepresent it.
     `.${idPrefix}-a:hover .${idPrefix}-g{opacity:0.75}` +
     `@media (prefers-reduced-motion:reduce){.${idPrefix}-eq{animation:none}.${idPrefix}-t,.${idPrefix}-u,.${idPrefix}-g{transition:none}}` +
@@ -755,7 +755,14 @@ export function renderCard({
   avatarImage,
   now = Date.now(),
 }: CardInput): string {
-  const theme = resolveTheme(options.theme);
+  const theme = resolveTheme(options.theme, {
+    bg: options.bgColor,
+    title: options.textColor,
+    artist: options.artistColor,
+    meta: options.metaColor,
+    accent: options.accentColor,
+    loved: options.lovedColor,
+  });
   const { width } = options;
 
   // `between` only earns its gutter if something is actually in it, otherwise
@@ -858,8 +865,9 @@ export function renderCard({
   const height = round(y);
   const altText = buildAltText(tracks);
 
-  // A caller-supplied colour wins over the theme, including over `transparent`.
-  const bg = options.bgColor ?? theme.bg;
+  // The background now comes from the resolved theme, which has already taken
+  // any caller-supplied color into account - including over `transparent`.
+  const bg = theme.bg;
   const background =
     bg === 'none'
       ? ''

@@ -15,7 +15,7 @@
 body {
   margin: 0 auto;
   padding: 44px 24px 56px;
-  max-width: 1000px;
+  max-width: 1160px;
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
@@ -48,31 +48,88 @@ h2 {
 }
 
 /* The widget is the only card on the page; everything else is plain sections
-   separated by space and hairlines. */
+   separated by space and hairlines.
+
+   The form gets the larger share. It has around twenty controls and the preview
+   has one image, so the old 320px column grew to roughly three times the height
+   of the column beside it - a tall ribbon of inputs next to a screen of empty
+   space. Laying the short controls out two-up shortens the form enough that the
+   two columns end up comparable. */
 .split {
   display: grid;
-  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
-  gap: 48px;
+  grid-template-columns: minmax(0, 500px) minmax(0, 1fr);
+  gap: 44px;
   align-items: start;
   margin-top: 36px;
 }
 
-@media (max-width: 780px) {
+/* Keeps the card in view while the form is scrolled. The preview column is
+   shorter than the form, so there is travel for it to stick through. */
+.preview-col {
+  position: sticky;
+  top: 24px;
+}
+
+@media (max-width: 860px) {
   .split {
     grid-template-columns: minmax(0, 1fr);
     gap: 32px;
   }
+
+  /* Stacked, the preview sits after the form, where sticking would pin it over
+     the content below rather than beside it. */
+  .preview-col {
+    position: static;
+  }
 }
 
-.field {
-  margin-bottom: 22px;
+/* Grouped controls. Two columns by default, with `span-2` for anything that
+   needs the full width - a text field, or a slider whose label would wrap. */
+.group {
+  border: 0;
+  padding: 0;
+  margin: 0 0 26px;
   min-width: 0;
 }
 
-.row {
+/* The rule above Embed is its own separation; the last group does not need to
+   add to it. */
+.group:last-of-type {
+  margin-bottom: 0;
+}
+
+.group > legend {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 12px;
+}
+
+.group-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 18px;
+  align-items: end;
+}
+
+.span-2 {
+  grid-column: 1 / -1;
+}
+
+/* One column below the point where two would leave the selects too narrow to
+   read their own option text. */
+@media (max-width: 560px) {
+  .group-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.field {
+  margin-bottom: 0;
+  min-width: 0;
 }
 
 label {
@@ -117,6 +174,337 @@ input[type='range'] {
   margin: 0;
 }
 
+/* Color rows: label, swatch, hex field, reset. The hex field is what carries
+   alpha and the "inherit from theme" empty state, neither of which a native
+   color input can express. */
+.colors {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0;
+  margin: 0;
+  background: color-mix(in srgb, var(--raised) 45%, transparent);
+}
+
+.colors > summary {
+  cursor: pointer;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  /* The page-wide `summary` rule adds a bottom margin for the Image URL
+     disclosure, which here hangs below the summary inside the bordered box and
+     leaves the collapsed section looking padded on one side only. */
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+
+/* Only earns a separator once there is something to separate it from. */
+.colors[open] > summary {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.colors > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* A caret drawn rather than relying on the platform marker, which sits
+   inconsistently across browsers when the summary is flex. */
+.colors > summary::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 4px solid var(--muted);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform 120ms ease;
+}
+
+.colors[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.colors > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 8px;
+}
+
+/* Says how many colors are set, so closing the section cannot hide the fact
+   that some are. Without it a customised color is invisible until reopened. */
+.badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--accent);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+.colors > *:not(summary) {
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+.colors > .hint {
+  margin-top: 0;
+  /* Supporting text for the controls below it, so it should read as a caption
+     rather than compete with them. */
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.colors > .color-status {
+  padding-bottom: 12px;
+}
+
+.color-row {
+  display: grid;
+  /* Wide enough for "Artists & times" on one line - the labels say what will
+     visibly change, which is more use than the name of the parameter. */
+  grid-template-columns: 7.5rem 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.color-row label {
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* The wrapper carries the border and the checkerboard, so a translucent or
+   unset color is visibly different from an opaque one. */
+.swatch-wrap {
+  display: block;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: var(--raised);
+}
+
+/* Only where there is real transparency to show. An unset color is inherited,
+   not transparent, and a checkerboard behind it says the wrong thing - the
+   empty field and the hidden Reset already carry "following the theme". */
+.swatch-wrap[data-alpha='true'] {
+  background-image: linear-gradient(45deg, #ffffff14 25%, transparent 25%),
+    linear-gradient(-45deg, #ffffff14 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ffffff14 75%),
+    linear-gradient(-45deg, transparent 75%, #ffffff14 75%);
+  background-size: 10px 10px;
+  background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+}
+
+.color-row input[type='color'] {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* Chrome and Firefox each wrap the rendered color in their own padded box.
+   These must stay as separate rules: a selector list containing a prefix the
+   browser does not recognise invalidates the whole rule, so pairing the two
+   vendor pseudo-elements means neither is applied and the UA's own swatch
+   border shows through as a pale edge. */
+.color-row input[type='color']::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-row input[type='color']::-webkit-color-swatch {
+  border: 0;
+  border-radius: 0;
+}
+
+.color-row input[type='color']::-moz-color-swatch {
+  border: 0;
+  border-radius: 0;
+}
+
+/* Inherited colors are shown solid: the swatch's job is to say what the card
+   will look like, and dimming it would imply the card is dimmer too. */
+
+.color-row input[type='text'] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  padding: 7px 9px;
+}
+
+.reset {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.72rem;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+
+.reset:hover {
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* Hidden rather than removed: the row must not reflow when a color is set. */
+.color-row[data-unset='true'] .reset {
+  visibility: hidden;
+}
+
+.color-status {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  min-height: 1.2em;
+}
+
+/* The link between the artist and timestamp colors: a bracket running from the
+   middle of one swatch to the middle of the other, with the chain sitting on
+   the line. Left of the swatches, so it reads as joining them rather than as a
+   third control in the row. */
+.linked-pair {
+  position: relative;
+  /* The pair owns the gap between its rows, so the bracket can be inset by
+     exactly half a row at each end - which is what makes it begin and end on
+     the swatch centres rather than near them. */
+  margin-bottom: 8px;
+  /* One row: the swatch (30px) plus the text input's slightly taller box. The
+     bracket is inset by half of this at each end, which is what lands it on the
+     swatch centres rather than near them. */
+  --row-h: 36px;
+}
+
+.linked-pair > .color-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.link-toggle {
+  position: absolute;
+  /* The gutter between the label column and the swatch. */
+  left: calc(7.5rem - 6px);
+  top: calc(var(--row-h) / 2);
+  bottom: calc(var(--row-h) / 2);
+  width: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.link-toggle:hover {
+  color: var(--text);
+}
+
+/* The bracket is 13px wide, which is a fussy thing to hit. This extends the
+   clickable area without moving the drawn line - mostly leftward and
+   vertically, since the swatches sit 1px to the right and stealing clicks from
+   them would be worse than a small target. */
+.link-toggle::before {
+  content: '';
+  position: absolute;
+  inset: -9px -2px -9px -15px;
+}
+
+.link-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Two halves of one bracket, each curving away from the chain and running out
+   toward the swatch it belongs to. */
+.link-arm {
+  flex: 1;
+  border-left: 1px solid currentColor;
+}
+
+.link-arm-top {
+  border-top: 1px solid currentColor;
+  border-radius: 5px 0 0 0;
+}
+
+.link-arm-bottom {
+  border-bottom: 1px solid currentColor;
+  border-radius: 0 0 0 5px;
+}
+
+/* Pulled left so the chain straddles the bracket's line instead of hanging off
+   it. */
+.link-icon {
+  display: block;
+  width: 13px;
+  height: 13px;
+  margin: 1px 0 1px -6px;
+}
+
+.link-icon svg {
+  display: block;
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+/* Unlinked: the arms stop short of turning toward the swatches and the chain is
+   struck through, so the state reads without waiting for a tooltip. */
+.link-toggle[aria-pressed='false'] .link-arm {
+  border-left-style: dashed;
+  opacity: 0.6;
+}
+
+.link-toggle[aria-pressed='false'] .link-arm-top {
+  border-top-color: transparent;
+}
+
+.link-toggle[aria-pressed='false'] .link-arm-bottom {
+  border-bottom-color: transparent;
+}
+
+.link-break {
+  display: none;
+}
+
+.link-toggle[aria-pressed='false'] .link-break {
+  display: block;
+}
+
+.link-toggle[aria-pressed='false'] .link-chain {
+  opacity: 0.45;
+}
+
+/* Driven by the artist color while linked. The text stays selectable so the
+   value can still be copied - it is `readonly`, not disabled - but the swatch
+   has nothing to offer, so it stops taking clicks. */
+.color-row[data-linked='true'] input[type='text'] {
+  opacity: 0.6;
+}
+
+.color-row[data-linked='true'] input[type='color'] {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.color-status[data-level='warn'] {
+  color: #d29922;
+}
+
+.color-status[data-level='error'] {
+  color: var(--accent);
+}
+
 /*
  * Validation sits on the label row rather than under the input. Below the
  * input it either reserves empty space - which makes this field look
@@ -150,6 +538,14 @@ input[type='range'] {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px 16px;
+}
+
+/* Inside a group the surrounding grid already provides the spacing, and the two
+   toggle blocks have different numbers of rows - aligning them to the top keeps
+   their rules level with each other. */
+.group-grid > .toggles {
+  margin-bottom: 0;
+  align-self: start;
 }
 
 .toggles legend {
@@ -204,9 +600,18 @@ input[type='range'] {
   max-width: 52ch;
 }
 
+/* Wide cards do not fit the column, and a silently shrunk preview makes the
+   type look smaller than it will be in a README. */
+.preview-scale {
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .embed {
-  margin-top: 32px;
-  padding-top: 28px;
+  margin-top: 22px;
+  padding-top: 20px;
   border-top: 1px solid var(--border);
 }
 

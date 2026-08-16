@@ -4,7 +4,7 @@
  * Everything here is drawn as SVG paths rather than embedded raster images.
  * Inside an <img>-rendered SVG we cannot reference external files, so the only
  * alternative would be base64 rasters - which are far larger, blur on HiDPI
- * displays, and cannot be recoloured per theme. Paths solve all three.
+ * displays, and cannot be recolored per theme. Paths solve all three.
  */
 
 /**
@@ -38,9 +38,9 @@ const LOGO_BASELINE_RATIO = 176.25 / LOGO_H;
 const LOGO_OVERSHOOT_RATIO = (179.4 - 176.25) / LOGO_H;
 
 /**
- * Last.fm's brand red. The wordmark is a trademark, so it keeps this colour in
- * every theme rather than taking the theme accent - a teal or pink "last.fm"
- * is no longer their mark. It reads acceptably on all supported backgrounds.
+ * Last.fm's brand red. The wordmark is a trademark, so it defaults to this in
+ * every theme rather than taking the theme accent - a teal or pink "last.fm" is
+ * no longer their mark. `logo_color` can override it deliberately.
  */
 export const LASTFM_RED = '#d51007';
 
@@ -70,14 +70,14 @@ export function lastfmLogo(
   x: number,
   baseline: number,
   height: number,
-  colour: string,
+  color: string,
   className?: string,
 ): string {
   const scale = height / LOGO_H;
   const top = baseline - LOGO_BASELINE_RATIO * height;
   const cls = className ? ` class="${className}"` : '';
   return (
-    `<g${cls} transform="translate(${x},${Math.round(top * 100) / 100}) scale(${scale.toFixed(5)})" fill="${colour}">` +
+    `<g${cls} transform="translate(${x},${Math.round(top * 100) / 100}) scale(${scale.toFixed(5)})" fill="${color}">` +
     `<path d="${LOGO_PATH}"/>` +
     `</g>`
   );
@@ -98,13 +98,13 @@ export const HEART_INK_INSET_RATIO = 2 / 24;
 /**
  * `size` is the rendered box width/height; the heart is centred on (cx, cy).
  */
-export function heart(cx: number, cy: number, size: number, colour: string, opacity = 1): string {
+export function heart(cx: number, cy: number, size: number, color: string, opacity = 1): string {
   const scale = size / 24;
   const x = cx - size / 2;
   const y = cy - size / 2;
   const op = opacity === 1 ? '' : ` opacity="${opacity}"`;
   return (
-    `<g transform="translate(${round(x)},${round(y)}) scale(${scale.toFixed(4)})" fill="${colour}"${op}>` +
+    `<g transform="translate(${round(x)},${round(y)}) scale(${scale.toFixed(4)})" fill="${color}"${op}>` +
     `<path d="${HEART_PATH}"/>` +
     `</g>`
   );
@@ -116,7 +116,7 @@ function round(n: number): number {
 
 /**
  * Vinyl-record tile shown when Last.fm has no cover for a track. Mirrors the
- * shape of Last.fm's own placeholder but drawn in theme colours so it sits in
+ * shape of Last.fm's own placeholder but drawn in theme colors so it sits in
  * the card instead of punching a bright grey hole in it.
  */
 export function vinylPlaceholder(

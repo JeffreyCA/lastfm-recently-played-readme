@@ -1,18 +1,20 @@
+import { contrastRatio, isLight, mix, parseRgba } from './color';
+
 export interface Theme {
   /** Card background. `none` renders a transparent card. */
   bg: string;
   border: string;
-  /** Track title colour. */
+  /** Track title color. */
   title: string;
-  /** Artist / secondary line colour. */
+  /** Artist / secondary line color. */
   artist: string;
-  /** Timestamp + footer colour. */
+  /** Timestamp + footer color. */
   meta: string;
   /** Now-playing accent (equaliser bars, "Scrobbling now" label). */
   accent: string;
   /** Placeholder tile fill when album art or an avatar is missing. */
   placeholder: string;
-  /** Glyph colour drawn on top of `placeholder`. */
+  /** Glyph color drawn on top of `placeholder`. */
   placeholderInk: string;
   /** Loved-track heart. Deliberately not `accent`: accent is blue in some
    * palettes, and a blue heart reads as a different thing entirely.
@@ -22,7 +24,7 @@ export interface Theme {
   lovedOff: string;
   /** Hairline rule between track rows. Should be barely perceptible. */
   divider: string;
-  /** Track title colour on hover, where the SVG is interactive. */
+  /** Track title color on hover, where the SVG is interactive. */
   titleHover: string;
 }
 
@@ -138,7 +140,99 @@ export function isThemeName(value: string): value is ThemeName {
   return Object.prototype.hasOwnProperty.call(THEMES, value);
 }
 
-export function resolveTheme(name: string | null | undefined): Theme {
-  if (name && isThemeName(name)) return THEMES[name];
-  return THEMES[DEFAULT_THEME];
+/**
+ * Caller-supplied colors, each null when not given.
+ *
+ * These are roles, not elements: `meta` is the timestamp, the footer and the
+ * stats labels together. Everything else in `Theme` is derived, because it is a
+ * relationship rather than a choice - mixing `title` toward `bg` reproduces the
+ * presets' own dividers and placeholders closely.
+ *
+ * Two pairs look mergeable and are not. `artist` and `meta` differ by 21 and 41
+ * out of 255 in `nord` and `catppuccin`, which pair a hued artist line with a
+ * neutral grey timestamp; and `nord`'s accent is blue, so `loved` cannot follow
+ * it without turning the heart blue.
+ */
+export interface ThemeOverrides {
+  bg?: string | null;
+  title?: string | null;
+  /** The artist line. */
+  artist?: string | null;
+  /** Timestamps, the footer, and the stats labels. */
+  meta?: string | null;
+  accent?: string | null;
+  loved?: string | null;
+}
+
+/** WCAG AA for body text; the card's smaller type is where it matters. */
+const MIN_CONTRAST = 4.5;
+
+/** Ratios measured from the presets - see `color.ts` and the tests. */
+const DERIVED = {
+  artist: 0.31,
+  meta: 0.48,
+  border: 0.89,
+  divider: 0.92,
+  placeholder: 0.92,
+  placeholderInk: 0.77,
+  lovedOff: 0.75,
+} as const;
+
+function hasOverride(overrides: ThemeOverrides | undefined): overrides is ThemeOverrides {
+  return Boolean(overrides && Object.values(overrides).some(Boolean));
+}
+
+export function resolveTheme(
+  name: string | null | undefined,
+  overrides?: ThemeOverrides,
+): Theme {
+  const base: Theme = name && isThemeName(name) ? THEMES[name] : THEMES[DEFAULT_THEME];
+
+  // The common path. Returning the preset object itself - rather than a copy
+  // built from the same values - keeps existing cards provably unchanged.
+  if (!hasOverride(overrides)) return base;
+
+  const bg = overrides.bg ?? base.bg;
+
+  // A background alone can make a theme unreadable - `?bg_color=ffffff` on the
+  // dark theme painted #e9eef5 onto white. Borrow the inks from whichever
+  // built-in palette suits it, which keeps the result looking designed in a way
+  // that computing a contrasting grey does not.
+  const contrast = contrastRatio(bg, base.title);
+  const ink: Theme =
+    contrast !== null && contrast < MIN_CONTRAST ? (isLight(bg) ? THEMES.light : THEMES.dark) : base;
+
+  const title = overrides.title ?? ink.title;
+  const accent = overrides.accent ?? ink.accent;
+  const loved = overrides.loved ?? ink.loved;
+
+  // Supporting colors are only re-derived when the pair they hang off has
+  // moved, and only when there is a background to fade toward: `transparent`
+  // has `bg: 'none'`, and mixing toward nothing collapses them onto the title.
+  const mixable = parseRgba(bg) !== null;
+  const derive = mixable && (title !== ink.title || bg !== ink.bg);
+  const from = (ratio: number, fallback: string): string =>
+    derive ? mix(title, bg, ratio) : fallback;
+
+  return {
+    bg,
+    title,
+    artist: overrides.artist ?? from(DERIVED.artist, ink.artist),
+    accent,
+    loved,
+    meta: overrides.meta ?? from(DERIVED.meta, ink.meta),
+    border: from(DERIVED.border, ink.border),
+    divider: from(DERIVED.divider, ink.divider),
+    placeholder: from(DERIVED.placeholder, ink.placeholder),
+    placeholderInk: from(DERIVED.placeholderInk, ink.placeholderInk),
+    // Tied to the heart rather than the text, so a custom heart keeps its
+    // muted form in the same hue.
+    lovedOff:
+      overrides.loved && mixable
+        ? mix(loved, bg, DERIVED.lovedOff)
+        : from(DERIVED.lovedOff, ink.lovedOff),
+    // The presets mostly set these equal already; where they differ it is a
+    // nudge that only makes sense against that palette's own accent.
+    titleHover: overrides.accent ?? ink.titleHover,
+  };
 }
