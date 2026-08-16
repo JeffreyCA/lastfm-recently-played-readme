@@ -62,6 +62,8 @@ npm run typecheck
 npm test
 ```
 
+TypeScript is held at 5.x on purpose. Vercel's Node builder drives the TypeScript compiler API to build files in `/api`, and it uses whichever copy the project has installed — 7.x is the native port and does not expose the same API, so the build fails with `Cannot read properties of undefined (reading 'readFile')`.
+
 `WORKER_ORIGIN` overrides the Worker it forwards to, which is how you point it at a local `wrangler dev`:
 
 ```bash
