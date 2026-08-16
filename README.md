@@ -3,11 +3,18 @@
 Show your recent Last.fm scrobbles on your GitHub profile README. Powered by [Cloudflare](https://www.cloudflare.com/products/workers/).  
 Check out [spotify-recently-played-readme](https://github.com/JeffreyCA/spotify-recently-played-readme) for a similar integration for Spotify.
 
-[![Try the interactive configurator](https://img.shields.io/badge/Try_the_interactive_configurator-D51007?style=for-the-badge&logo=lastdotfm&logoColor=white)](https://lastfm-recently-played.jeffreyca.workers.dev)
+<!-- Rendered as HTML so both badges can be given the same height: the shields
+     badge is 28px tall and Cloudflare's button is 39px, which looks misaligned
+     side by side. Both are SVG, so scaling stays sharp. -->
+<a href="https://lastfm-recently-played.jeffreyca.workers.dev"><img alt="Try the interactive configurator" height="36" src="https://img.shields.io/badge/Try_the_interactive_configurator-D51007?style=for-the-badge&logo=lastdotfm&logoColor=white"></a>
+<a href="https://deploy.workers.cloudflare.com/?url=https://github.com/JeffreyCA/lastfm-recently-played-readme"><img alt="Deploy to Cloudflare" height="36" src="https://deploy.workers.cloudflare.com/button"></a>
 
 ---
 
 ## Getting started
+
+> [!NOTE]
+> GitHub caches README images through its own proxy, so new scrobbles may appear within a few minutes rather than instantly.
 
 Just add the following into your README and set the query parameter `user` to your Last.fm username.
 
@@ -24,9 +31,6 @@ Or make the whole card a link to your Last.fm profile:
 ```
 
 [![My scrobbles](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01)](https://www.last.fm/user/JeffreyCA01)
-
-> [!NOTE]
-> GitHub caches README images through its own proxy, so new scrobbles may appear within a few minutes rather than instantly.
 
 ## Customization
 
@@ -164,8 +168,8 @@ GitHub supports `<picture>` in READMEs, so the card can follow the reader's them
 Requires Node 22+.
 
 ```bash
-git clone https://github.com/JeffreyCA/lastfm-priv.git
-cd lastfm-priv
+git clone https://github.com/JeffreyCA/lastfm-recently-played-readme.git
+cd lastfm-recently-played-readme
 npm install
 ```
 
@@ -185,7 +189,7 @@ npm test
 
 ## Deploying
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/JeffreyCA/lastfm-priv)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/JeffreyCA/lastfm-recently-played-readme)
 
 That clones the repo into your own account, provisions the Worker, and prompts for `LASTFM_API_KEY`. Every later push to `main` redeploys. It fits comfortably inside the free tier.
 

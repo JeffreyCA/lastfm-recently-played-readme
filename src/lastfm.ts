@@ -130,7 +130,7 @@ async function callApi(
     response = await fetch(url, {
       headers: {
         Accept: 'application/json',
-        'User-Agent': 'lastfm-recently-played (+https://github.com/JeffreyCA/lastfm-priv)',
+        'User-Agent': 'lastfm-recently-played (+https://github.com/JeffreyCA/lastfm-recently-played-readme)',
       },
       signal: AbortSignal.timeout(timeoutMs),
     });
