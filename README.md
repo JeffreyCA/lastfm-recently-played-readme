@@ -34,7 +34,7 @@ Or make the whole card a link to your Last.fm profile:
 
 ## Customization
 
-Add parameters to the URL, e.g. `?user=JeffreyCA01&theme=light&count=3`.
+Use [the configurator](https://lastfm-recently-played.jeffreyca.workers.dev) to interactively build your widget, or add the query parameters below by hand, e.g. `?user=JeffreyCA01&theme=dracula&count=3`.
 
 | Parameter | Description | Default | Values |
 | --- | --- | --- | --- |
