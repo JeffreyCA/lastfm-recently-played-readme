@@ -717,18 +717,22 @@ input[type='range'] {
   background: var(--raised);
   border: 1px solid var(--border);
   border-radius: 8px;
-  overflow-x: auto;
 }
 
+/* Wraps rather than scrolling sideways. The snippet is one long line and the
+   column is narrower than it, so a scrolling box shows the front of the string
+   and hides the part - the options - that the reader is here to check. */
 .snippet code {
   font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
   font-size: 0.8rem;
-  white-space: pre;
+  white-space: pre-wrap;
+  /* A URL has no spaces to break at, so without this it overflows the box
+     whole. */
+  word-break: break-all;
 }
 
-/* Below the box rather than floating inside it: the snippet is a single long
-   line that scrolls sideways, and a button sitting over its right-hand end
-   covers the part being scrolled to. */
+/* Below the box rather than floating inside it: the box is now several lines
+   tall and a button over its top-right corner sits on the text. */
 .copy-row {
   display: flex;
   flex-wrap: wrap;
