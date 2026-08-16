@@ -79,3 +79,22 @@ Deliberately minimal and it should stay that way while the design is still movin
 The color tests are the exception that proves the rule: they assert ratios and contrast, never positions. Their tolerances are set from measured error against the presets (worst case 22/255, in `meta` for `nord` and `border` for `light`) rather than picked to make the suite pass - a tolerance tightened past the real spread will fail on a theme nobody touched.
 
 Static assets aren't served through `SELF.fetch` in vitest-pool-workers - the runtime handles them before the Worker - so the configurator is only verifiable against a real dev server.
+
+
+<!-- github-knowledge-base-start -->
+## Knowledge Base
+
+### Purpose
+
+This repository uses the Knowledge Base at [https://github.com/JeffreyCA/lastfm-recently-played-readme](https://github.com/JeffreyCA/lastfm-recently-played-readme) on branch `main`.
+
+### Required behavior
+
+1. Before changing code, read `docs/index.md` from that branch.
+2. Use the index to open only the knowledge files relevant to the task.
+3. If the index is unavailable, stop and report that the Knowledge Base could not be loaded.
+
+### Source of truth
+
+Generated knowledge tracks the code. When the knowledge and code disagree, trust the code.
+<!-- github-knowledge-base-end -->
