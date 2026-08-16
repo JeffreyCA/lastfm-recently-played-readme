@@ -1,55 +1,31 @@
 {
-  "name": "lastfm-recently-played",
-  "version": "0.1.0",
-  "description": "Embeddable Last.fm recently-played widget for GitHub profile READMEs, served as SVG from a Cloudflare Worker.",
-  "main": "src/index.ts",
+  "name": "lastfm-recently-played-vercel-proxy",
+  "version": "1.0.0",
+  "description": "Compatibility shim that keeps the original Vercel endpoint working by forwarding to the Cloudflare Worker.",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "start": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "dev": "vercel dev",
     "typecheck": "tsc --noEmit",
-    "cf-typegen": "wrangler types"
-  },
-  "engines": {
-    "node": ">=22"
-  },
-  "cloudflare": {
-    "bindings": {
-      "LASTFM_API_KEY": {
-        "description": "Create one at [last.fm/api/account/create](https://www.last.fm/api/account/create). Only the **API key** is needed, not the shared secret."
-      }
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/JeffreyCA/lastfm-priv.git"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "lastfm",
     "github-profile",
     "readme",
-    "widget",
     "svg",
-    "cloudflare-workers"
+    "vercel"
   ],
   "author": "JeffreyCA",
   "license": "MIT",
-  "type": "module",
-  "bugs": {
-    "url": "https://github.com/JeffreyCA/lastfm-priv/issues"
-  },
-  "homepage": "https://github.com/JeffreyCA/lastfm-priv#readme",
-  "dependencies": {
-    "hono": "^4.13.2"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JeffreyCA/lastfm-recently-played-readme.git"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.21.3",
-    "@cloudflare/workers-types": "^5.20260815.1",
+    "@types/node": "^26.2.0",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.10",
-    "wrangler": "^4.123.0"
+    "vitest": "^4.1.10"
   }
 }

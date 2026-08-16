@@ -1,210 +1,72 @@
-# Last.fm Recently Played README
+# Last.fm Recently Played README — Vercel proxy
 
-Show your recent Last.fm scrobbles on your GitHub profile README. Powered by [Cloudflare](https://www.cloudflare.com/products/workers/).  
-Check out [spotify-recently-played-readme](https://github.com/JeffreyCA/spotify-recently-played-readme) for a similar integration for Spotify.
+The card itself now lives in a [Cloudflare Worker](https://github.com/JeffreyCA/lastfm-recently-played-readme/tree/main). This branch is what's left on Vercel: a shim that keeps the original endpoint working.
 
-[![Try the interactive configurator](https://img.shields.io/badge/Try_the_interactive_configurator-D51007?style=for-the-badge&logo=lastdotfm&logoColor=white)](https://lastfm-recently-played.jeffreyca.workers.dev)
+Every URL that anyone has ever pasted into a README points at `lastfm-recently-played.vercel.app/api`, so that route can't disappear. It no longer renders anything — it maps the old query parameters onto the new ones, forwards the request to the Worker, and passes the SVG straight back.
 
-Pick your options, preview the card, and copy/paste the snippet into your README.
-
----
-
-## Getting started
-
-Just add the following into your README and set the query parameter `user` to your Last.fm username.
+**Nothing to do if you already use this.** Your existing URL keeps working. New cards are better off pointing at the Worker directly:
 
 ```markdown
 ![My scrobbles](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01)
 ```
 
-![My scrobbles](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01)
+`/` redirects to the configurator, where you can pick options and copy a snippet.
 
-Or make the whole card a link to your Last.fm profile:
+## Parameter mapping
 
-```markdown
-[![My scrobbles](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01)](https://www.last.fm/user/JeffreyCA01)
-```
-
-[![My scrobbles](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01)](https://www.last.fm/user/JeffreyCA01)
-
-> [!NOTE]
-> GitHub caches README images through its own proxy, so new scrobbles may appear within a few minutes rather than instantly.
-
-## Customization
-
-Add parameters to the URL, e.g. `?user=JeffreyCA01&theme=light&count=3`.
-
-| Parameter | Description | Default | Values |
-| --- | --- | --- | --- |
-| `user` | Whose scrobbles to show | *required* | Last.fm username |
-| `count` | How many tracks. A now-playing track counts as one | `5` | `1`-`10` |
-| `theme` | Colour scheme | `dark` | `dark`, `legacy`, `light`, `nord`, `catppuccin`, `transparent` |
-| `bg_color` | Background colour only. Text colours stay as the theme has them | theme's | hex digits, no `#` - e.g. `212121` |
-| `width` | Card width in pixels | `400` | `260`-`800` |
-| `radius` | Corner rounding | `10` | `0`-`24` |
-| `art` | Album artwork | `1` | `1` / `0` |
-| `header` | The "Recently Played" row | `1` | `1` / `0` |
-| `logo` | Last.fm wordmark in the header | `1` | `1` / `0` |
-| `profile` | Where your username and picture appear | `header` | `header`, `footer-left`, `footer-right`, `off` |
-| `username` | Show your username in that spot | `1` | `1` / `0` |
-| `avatar` | Show your profile picture in that spot | `1` | `1` / `0` |
-| `time` | "6m ago" timestamps | `1` | `1` / `0` |
-| `stats` | Scrobbles / artists / tracks totals | `off` | `off`, `block`, `block-center`, `compact` |
-| `footer` | What sits below the tracks. Ignored when `profile` is in the footer | `off` | `off`, `stats`, `wave` |
-| `loved` | Where to mark tracks you've hearted | `time` | `off`, `between`, `between-all`, `title`, `time` |
-
-Booleans also accept `true`/`false`, `yes`/`no`, `on`/`off`. Numbers outside their range are clamped rather than rejected.
-
-### Loved tracks
-
-| `loved` | Where the indicator (heart icon) goes |
+| Old parameter | Becomes |
 | --- | --- |
-| `between` | Left of the track name, loved tracks only |
-| `between-all` | Left of the track name, greyed out when not loved |
-| `title` | Right after the track name |
-| `time` | Just before the timestamp (default) |
-| `off` | Hidden |
+| `user` | `user`, unchanged |
+| `count` | `count` |
+| `width` | `width`, clamped by the Worker to `260`–`800` |
+| `border_radius` | `radius`, clamped by the Worker to `0`–`24` |
+| `bg_color` | `bg_color`, with a leading `#` stripped |
+| `loved` + `loved_style` | `loved=off` / `between` / `between-all` / `title` / `time` |
+| `header_style`, `header_size` | `header=0`/`1`, plus `stats=block` / `block-center` |
+| `footer_style` | `footer=wave` / `stats`, or nothing for the profile-only styles |
+| `show_user` | `profile=header` / `footer-right` / `off` |
+| `maxage` | This response's cache lifetime, which is what it always controlled. 60–3600, default 180 |
 
-### Automatic light and dark
+The card follows the Worker's default palette, so existing embeds pick up the newer look rather than the old charcoal. Passing `theme` — `dark`, `legacy`, `light`, `nord`, `catppuccin`, `transparent` — chooses explicitly; `legacy` is the `#212121` this endpoint used to render.
 
-GitHub supports `<picture>` in READMEs, so the card can follow the reader's theme:
+Where the old endpoint answered a bad value with HTTP 400 and a JSON body — which renders in a README as a broken image with no explanation — this one clamps or ignores it, and leaves real failures to the Worker, which draws them as a card.
 
-```html
-<picture>
-  <source media="(prefers-color-scheme: dark)"
-          srcset="https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=dark">
-  <img src="https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=light">
-</picture>
-```
+### Not carried over
 
-## Examples
+- Colours: the card now renders in the Worker's default palette instead of the old `#212121`. Add `theme=legacy` to keep the original look.
+- Header and footer sizes: `compact` and `normal` render identically now, and the `_stats` variants only decide whether stats are shown.
+- `footer_style=compact|normal` did nothing on their own except make room for the footer profile, which `show_user` already places.
+- `show_user=always` showed the profile twice; it now maps to the header.
+- `header_style=*_stats_only` combined with `show_user=header|always` drops the profile, because the Worker draws it as part of the header row that setting hides.
+- The internal `/api/proxy` image endpoint is gone. It existed to inline album art and was never meant to be called directly.
 
-**Profile stats, in one line**
+## How it works
 
-```markdown
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&stats=compact&count=3)
-```
+`api/index.ts` is the whole thing: one Vercel Function using the [`fetch` Web Standard export](https://vercel.com/docs/functions/functions-api-reference#fetch-web-standard), with no dependencies and no build step. `api/_translate.ts` holds the parameter mapping — files in `/api` starting with `_` aren't turned into functions, so it stays a plain module.
 
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&stats=compact&count=3)
+Two constraints come from GitHub rendering the card through its Camo image proxy, and they account for most of the code:
 
-**Stats as centred columns, with a wave**
+- **Never answer with a 4xx.** Camo shows it as a broken image and caches the failure. If the Worker can't be reached, this returns a small fallback card at HTTP 200 with a 10 second TTL.
+- **Finish inside Camo's ~10s socket timeout.** The upstream request is capped below that, so a slow Worker degrades to the fallback rather than to a broken image.
 
-```markdown
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&stats=block-center&footer=wave&count=3)
-```
+Conditional requests are forwarded, so a `304` from the Worker stays a `304` here.
 
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&stats=block-center&footer=wave&count=3)
-
-**Your profile in the footer instead of the header**
-
-```markdown
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&header=0&profile=footer-right&count=3)
-```
-
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&header=0&profile=footer-right&count=3)
-
-**Hearts beside every track, light theme**
-
-```markdown
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=light&loved=between-all&count=3)
-```
-
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=light&loved=between-all&count=3)
-
-**Nord, hearts after the track name, stats as columns**
-
-```markdown
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=nord&loved=title&stats=block&count=3)
-```
-
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=nord&loved=title&stats=block&count=3)
-
-**Catppuccin with a custom background**
-
-```markdown
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=catppuccin&bg_color=181825&count=3)
-```
-
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=catppuccin&bg_color=181825&count=3)
-
-**Text only - no artwork, no logo, no picture, square corners**
-
-```markdown
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&art=0&logo=0&avatar=0&radius=0&count=4)
-```
-
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&art=0&logo=0&avatar=0&radius=0&count=4)
-
-**Narrow, for a sidebar or a table cell**
-
-```markdown
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&width=280&count=3&time=0)
-```
-
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&width=280&count=3&time=0)
-
-**Ten tracks, wide, everything on**
-
-```markdown
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&count=10&width=560&stats=compact&footer=wave&loved=time)
-```
-
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&count=10&width=560&stats=compact&footer=wave&loved=time)
-
-**Transparent, to sit on any background**
-
-```markdown
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=transparent&count=3)
-```
-
-![](https://lastfm-recently-played.jeffreyca.workers.dev/svg?user=JeffreyCA01&theme=transparent&count=3)
-
----
+Responses carry `max-age` as well as `s-maxage`. Vercel's proxy consumes the CDN directives and strips them, so a response setting only `s-maxage` reaches GitHub's image proxy as `max-age=0, must-revalidate` — meaning every view of every README revalidates against the function. `max-age` is what stops that, and `maxage` still sets it.
 
 ## Running locally
 
-Requires Node 22+.
-
 ```bash
-git clone https://github.com/JeffreyCA/lastfm-priv.git
-cd lastfm-priv
 npm install
-```
-
-Get a Last.fm API key at [last.fm/api/account/create](https://www.last.fm/api/account/create).
-
-```bash
-cp .dev.vars.example .dev.vars   # then paste your key in
-npm run dev
-```
-
-That serves the configurator at <http://localhost:8787> and the widget at `http://localhost:8787/svg?user=YOUR_USERNAME`.
-
-```bash
+npm run dev        # vercel dev, on :3000
 npm run typecheck
 npm test
 ```
 
-## Deploying
-
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/JeffreyCA/lastfm-priv)
-
-That clones the repo into your own account, provisions the Worker, and prompts for `LASTFM_API_KEY`. Every later push to `main` redeploys. It fits comfortably inside the free tier.
-
-To deploy by hand instead:
+`WORKER_ORIGIN` overrides the Worker it forwards to, which is how you point it at a local `wrangler dev`:
 
 ```bash
-npx wrangler secret put LASTFM_API_KEY
-npm run deploy
+WORKER_ORIGIN=http://localhost:8787 npm run dev
 ```
-
-If you attach a custom domain, a WAF rate-limit rule on `/svg` (say 60 requests/minute per IP) is worth adding, since the URL is public and anyone can point it at any username. WAF rules need a domain you control; they can't be applied to a `*.workers.dev` URL.
-
-## How it works
-
-The Worker asks Last.fm for your recent tracks, downloads the album art, and renders everything into a single self-contained SVG. Album art is embedded directly in the image, because an SVG displayed in an `<img>` can't load anything from outside itself.
-
-Track data comes from `user.getRecentTracks`, which is public - that's why this needs nothing from you but a username. Responses are cached briefly to keep the shared API key well inside Last.fm's limits.
 
 ## Licence
 

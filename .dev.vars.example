@@ -1,7 +1,0 @@
-# Copy to `.dev.vars` for local development (`npm run dev`).
-# `.dev.vars` is gitignored - never commit a real key.
-#
-# Get a key at https://www.last.fm/api/account/create
-# Only the API key is needed; this service never uses the shared secret
-# because user.getRecentTracks is a public, unauthenticated endpoint.
-LASTFM_API_KEY=your_lastfm_api_key_here
