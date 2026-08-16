@@ -276,7 +276,6 @@ interface TextOptions {
   fill: string;
   weight?: number;
   anchor?: 'start' | 'end';
-  dominantBaseline?: 'middle';
   className?: string;
   tracking?: number;
   /**
@@ -301,7 +300,6 @@ function text(
     fill,
     weight,
     anchor,
-    dominantBaseline,
     className,
     tracking,
     textLength,
@@ -311,7 +309,6 @@ function text(
   return (
     `<text${className ? ` class="${className}"` : ''} x="${round(x)}" y="${round(y)}"` +
     `${anchor === 'end' ? ' text-anchor="end"' : ''}` +
-    `${dominantBaseline ? ` dominant-baseline="${dominantBaseline}"` : ''}` +
     ` font-family="${FONT_STACK}" font-size="${size}"` +
     `${weight ? ` font-weight="${weight}"` : ''}` +
     `${tracking ? ` letter-spacing="${tracking}"` : ''}` +
@@ -406,34 +403,38 @@ function usesGutter(mode: LovedMode): boolean {
 }
 
 /**
- * Half the height of the tallest header element.
+ * Visual bounds of the header's contents relative to its shared baseline.
  *
- * Every element is independently centered on one shared line. This matters for
- * the wordmark: aligning its baseline with the title puts almost all of its
- * ink above the centre because it has virtually no descent.
+ * The band is symmetric about the title's cap-to-baseline center. The logo,
+ * title and username keep one typographic baseline, while the avatar is
+ * centered on the same optical line. Taking the largest reach on either side
+ * keeps the cluster centered without platform-specific SVG baseline keywords.
  */
-function headerHalfHeight(options: WidgetOptions): number {
-  let half = ((CAP_RATIO + DESC_RATIO) * HEADER_TITLE_SIZE) / 2;
+function headerExtent(options: WidgetOptions): { top: number; bottom: number } {
+  const center = -(CAP_RATIO * HEADER_TITLE_SIZE) / 2;
+  const spans: Array<[number, number]> = [[-CAP_RATIO * HEADER_TITLE_SIZE, 0]];
 
   if (options.logo) {
-    half = Math.max(half, (logoAscent(LOGO_H) + logoDescent(LOGO_H)) / 2);
+    spans.push([-logoAscent(LOGO_H), logoDescent(LOGO_H)]);
   }
 
   if (options.profile === 'header') {
-    if (options.username) {
-      half = Math.max(half, ((CAP_RATIO + DESC_RATIO) * USER_SIZE) / 2);
-    }
-    if (options.avatar) {
-      half = Math.max(half, AVATAR_SIZE / 2);
-    }
+    if (options.username) spans.push([-CAP_RATIO * USER_SIZE, 0]);
+    if (options.avatar) spans.push([center - AVATAR_SIZE / 2, center + AVATAR_SIZE / 2]);
   }
 
-  return half;
+  let half = 0;
+  for (const [top, bottom] of spans) {
+    half = Math.max(half, center - top, bottom - center);
+  }
+
+  return { top: center - half, bottom: center + half };
 }
 
-function renderHeader(ctx: Ctx, centerY: number, avatarImage: string | null): string {
+function renderHeader(ctx: Ctx, baseline: number, avatarImage: string | null): string {
   const { theme, options, idPrefix, rightEdge } = ctx;
   const parts: string[] = [];
+  const avatarCenterY = capCentre(baseline, HEADER_TITLE_SIZE);
 
   // Right: the profile, when it lives here. `avatar` and `username` say what
   // it contains; `profile` says where it goes.
@@ -448,16 +449,15 @@ function renderHeader(ctx: Ctx, centerY: number, avatarImage: string | null): st
   let identity = '';
   if (showAvatar) {
     const cx = rightEdge - nameWidth - avatarGap - AVATAR_SIZE / 2;
-    identity += avatarTile(avatarImage, cx, centerY, ctx);
+    identity += avatarTile(avatarImage, cx, avatarCenterY, ctx);
     rightUsed += avatarGap + AVATAR_SIZE;
   }
   if (showName) {
-    identity += text(options.user, rightEdge, centerY, {
+    identity += text(options.user, rightEdge, baseline, {
       size: USER_SIZE,
       weight: 600,
       fill: theme.title,
       anchor: 'end',
-      dominantBaseline: 'middle',
       className: `${idPrefix}-u`,
       textLength: showAvatar ? nameWidth : undefined,
     });
@@ -475,20 +475,13 @@ function renderHeader(ctx: Ctx, centerY: number, avatarImage: string | null): st
     );
   }
 
-  // Left: wordmark then title, independently aligned to the shared center.
+  // Left: wordmark then title, sharing the same baseline as the username.
   let titleX = PAD_X;
   if (options.logo) {
-    const logoBaseline = centerY + (logoAscent(LOGO_H) - logoDescent(LOGO_H)) / 2;
     parts.push(
       link(
         ctx.profileHref,
-        lastfmLogo(
-          PAD_X,
-          logoBaseline,
-          LOGO_H,
-          options.logoColor ?? LASTFM_RED,
-          `${idPrefix}-g`,
-        ),
+        lastfmLogo(PAD_X, baseline, LOGO_H, options.logoColor ?? LASTFM_RED, `${idPrefix}-g`),
         `${idPrefix}-a`,
         `${options.user} on Last.fm`,
       ),
@@ -501,12 +494,11 @@ function renderHeader(ctx: Ctx, centerY: number, avatarImage: string | null): st
     text(
       truncateToWidth('Recently Played', HEADER_TITLE_SIZE, available, 600),
       titleX,
-      centerY,
+      baseline,
       {
         size: HEADER_TITLE_SIZE,
         weight: 600,
         fill: theme.title,
-        dominantBaseline: 'middle',
       },
     ),
   );
@@ -890,11 +882,11 @@ export function renderCard({
   let statsShown = false;
 
   if (options.header) {
-    const halfHeight = headerHalfHeight(options);
-    const centerY = y + halfHeight;
-    body.push(renderHeader(ctx, centerY, avatarImage ?? null));
+    const extent = headerExtent(options);
+    const baseline = Math.round(y - extent.top);
+    body.push(renderHeader(ctx, baseline, avatarImage ?? null));
     // Section boundaries stay on whole pixels so their 1px rules remain crisp.
-    y = Math.round(centerY + halfHeight);
+    y = Math.round(baseline + extent.bottom);
   }
 
   if (options.stats !== 'off') {
