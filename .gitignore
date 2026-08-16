@@ -5,3 +5,6 @@ node_modules/
 Thumbs.db
 .idea/
 .vscode/
+
+# Scratch output from manual endpoint checks.
+*.svg
