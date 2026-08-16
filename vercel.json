@@ -1,6 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "git": {
+    "deploymentEnabled": {
+      "main": false,
+      "cf-rewrite": false
+    }
+  },
   "functions": {
     "api/index.ts": {
       "maxDuration": 15

@@ -53,6 +53,15 @@ Conditional requests are forwarded, so a `304` from the Worker stays a `304` her
 
 Responses carry `max-age` as well as `s-maxage`. Vercel's proxy consumes the CDN directives and strips them, so a response setting only `s-maxage` reaches GitHub's image proxy as `max-age=0, must-revalidate` — meaning every view of every README revalidates against the function. `max-age` is what stops that, and `maxage` still sets it.
 
+## Deploying
+
+This branch is the only one Vercel should build — the Worker branches have nothing for it to deploy. That takes two project settings, because neither can be expressed here alone:
+
+- **Settings → Git → Production Branch**: `vercel`.
+- **Settings → Git → Ignored Build Step**: `bash -c '[ "$VERCEL_GIT_COMMIT_REF" != "vercel" ]'`. Exit code 0 skips the build, so this builds `vercel` and skips everything else.
+
+`vercel.json` also disables deployments for `main` and `cf-rewrite`, but that is only a backstop: Vercel reads the file from the branch being pushed, and those branches don't have one.
+
 ## Running locally
 
 ```bash
