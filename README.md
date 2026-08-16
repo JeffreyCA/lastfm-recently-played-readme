@@ -65,19 +65,9 @@ Booleans also accept `true`/`false`, `yes`/`no`, `on`/`off`. Numbers outside the
 
 ### Colors
 
-Each color parameter layers on top of the chosen theme and is optional - anything you leave out keeps following the theme, so a URL only ever carries what you actually changed. All of them take 3, 4, 6 or 8 hex digits with no leading `#` (4 and 8 include alpha).
+Every color takes 3, 4, 6 or 8 hex digits (without leading `#`) - 4 and 8 include alpha.
 
-These are roles rather than single elements - `meta_color` covers the timestamps, the footer and the stats labels together - and everything else the card draws is derived from them: the row dividers, the artwork placeholders, the muted heart. Those are relationships rather than decisions, and mixing `text_color` with `bg_color` reproduces the built-in themes' own supporting colors closely.
-
-`artist_color` and `meta_color` look like one control and are not. In the neutral themes the timestamp is the artist color faded a little further, but `nord` and `catppuccin` deliberately pair a colored artist line with a neutral grey timestamp. The configurator links the two by default and lets you break the link.
-
-`loved_color` is separate from `accent_color` for the same kind of reason: `nord`'s accent is blue, and a blue heart reads as something else entirely. In the other themes the two are the same color.
-
-`logo_color` is the exception to all of it: the wordmark is Last.fm's trademark, so it stays their red in every theme unless you deliberately change it.
-
-If a background is picked that the theme's text can't be read against, the card takes its text colors from whichever built-in palette suits that background instead of rendering something illegible. So `?bg_color=ffffff` on the dark theme gives dark text, not white-on-white. Set `text_color` yourself to override that.
-
-The [configurator](https://lastfm-recently-played.jeffreyca.workers.dev) has a picker for each one and shows the text contrast as you go.
+`bg_color` is safe on its own: the card picks readable text for whatever background you give it, so `?bg_color=ffffff` on the dark theme comes out dark-on-white rather than white-on-white. Set `text_color` to choose for yourself.
 
 ### Loved tracks
 
