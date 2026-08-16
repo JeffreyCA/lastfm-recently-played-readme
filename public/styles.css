@@ -1,9 +1,11 @@
 :root {
-  --bg: #151b23;
-  --raised: #1c232c;
+  --bg: #0d1117;
+  --raised: #151b23;
   --border: #2a323d;
-  --text: #e9eef5;
-  --muted: #7d8b9c;
+  --line-soft: #222a34;
+  --text: #e6edf3;
+  --muted: #9198a1;
+  --faint: #6e7681;
   --accent: #d51007;
   color-scheme: dark;
 }
@@ -14,41 +16,68 @@
 
 body {
   margin: 0 auto;
-  padding: 44px 24px 56px;
   max-width: 1160px;
+  padding: 0 24px;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+  font:
+    15px/1.5 -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
     sans-serif;
-  line-height: 1.55;
 }
 
+/* The header block below is kept identical to the one in
+   spotify-recently-played-readme, so switching between the two sites shows no
+   shift in the title, tagline or pills. Change both or neither. */
 header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 28px 0 20px;
+  border-bottom: 1px solid var(--line-soft);
 }
 
 /* Sits on the title's line rather than under it, so it stays out of the form's
    way while remaining the first thing above the fold. */
+.links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .repo-link {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  flex-shrink: 0;
-  margin-top: 4px;
-  padding: 6px 12px;
+  padding: 7px 14px;
   border: 1px solid var(--border);
   border-radius: 999px;
   color: var(--muted);
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* The wordmark is sized by height; without this the flex row stretches it. The
+   negative margin trims the row's gap: a wordmark ends in letterforms that
+   carry their own side bearing, so it needs less air than the square icon on
+   the pill beside it. */
+.repo-link .spotify {
+  flex: none;
+  width: auto;
+  margin-right: -2px;
 }
 
 .repo-link:hover {
   color: var(--text);
-  border-color: var(--muted);
+  border-color: var(--faint);
 }
 
 .repo-link:focus-visible {
@@ -63,27 +92,23 @@ header {
 }
 
 h1 {
-  margin: 0 0 6px;
-  font-size: 1.75rem;
-  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+  font-size: 21px;
+  letter-spacing: -0.01em;
 }
 
-h1 span {
+h1 .accent {
   color: var(--accent);
 }
 
 header p {
   margin: 0;
   color: var(--muted);
+  font-size: 14px;
 }
 
-h2 {
-  margin: 0 0 14px;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--muted);
-  font-weight: 600;
+main {
+  padding: 24px 0 48px;
 }
 
 /* The widget is the only card on the page; everything else is plain sections
@@ -99,14 +124,19 @@ h2 {
   grid-template-columns: minmax(0, 500px) minmax(0, 1fr);
   gap: 44px;
   align-items: start;
-  margin-top: 36px;
+  margin-top: 0;
 }
 
-/* Keeps the card in view while the form is scrolled. The preview column is
-   shorter than the form, so there is travel for it to stick through. */
-.preview-col {
+/* Keeps the snippet and the card in view while the form is scrolled. The
+   output column is shorter than the form, so there is travel for it to stick
+   through. */
+.output-col {
   position: sticky;
   top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  min-width: 0;
 }
 
 @media (max-width: 860px) {
@@ -115,9 +145,9 @@ h2 {
     gap: 32px;
   }
 
-  /* Stacked, the preview sits after the form, where sticking would pin it over
+  /* Stacked, the output sits after the form, where sticking would pin it over
      the content below rather than beside it. */
-  .preview-col {
+  .output-col {
     position: static;
   }
 }
@@ -648,10 +678,10 @@ input[type='range'] {
   font-variant-numeric: tabular-nums;
 }
 
+/* Top of the output column, so it needs no rule or heading to separate it -
+   it is the first thing there. */
 .embed {
-  margin-top: 22px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
+  min-width: 0;
 }
 
 .tabs {
@@ -681,13 +711,9 @@ input[type='range'] {
   color: var(--text);
 }
 
-.snippet {
-  position: relative;
-}
-
 .snippet pre {
   margin: 0;
-  padding: 14px 92px 14px 14px;
+  padding: 14px;
   background: var(--raised);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -700,22 +726,42 @@ input[type='range'] {
   white-space: pre;
 }
 
+/* Below the box rather than floating inside it: the snippet is a single long
+   line that scrolls sideways, and a button sitting over its right-hand end
+   covers the part being scrolled to. */
+.copy-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
 .copy {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: var(--bg);
+  background: var(--raised);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 999px;
   color: var(--text);
-  padding: 5px 12px;
+  padding: 7px 16px;
   font: inherit;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
+}
+
+/* Copying the snippet is what almost everyone came for; the URL is the
+   variant. */
+.copy.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 .copy:hover:not(:disabled) {
   border-color: var(--accent);
+}
+
+.copy.primary:hover:not(:disabled) {
+  filter: brightness(1.12);
 }
 
 .copy:disabled {
@@ -724,17 +770,7 @@ input[type='range'] {
 }
 
 .copy.copied {
+  background: var(--raised);
   border-color: #3fb950;
   color: #3fb950;
-}
-
-details {
-  margin-top: 18px;
-}
-
-summary {
-  cursor: pointer;
-  font-size: 0.82rem;
-  color: var(--muted);
-  margin-bottom: 12px;
 }

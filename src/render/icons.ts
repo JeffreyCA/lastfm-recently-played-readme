@@ -65,6 +65,13 @@ export function logoWidth(height: number): number {
  *
  * `baseline` is the y the glyphs sit on, so the wordmark can be aligned with
  * adjacent text the same way two pieces of text are aligned with each other.
+ *
+ * The unpainted rect makes the whole wordmark box a hit target. Without it,
+ * pointer events follow the glyph outlines themselves, so the link only
+ * responds on the strokes of the letters and misses the counters and the gaps
+ * between them - which is most of the area a reader aims at. `pointer-events`
+ * rather than a transparent fill, because a fill of alpha 0 is not reliably
+ * hit-tested and would also have to be kept out of the hover fade.
  */
 export function lastfmLogo(
   x: number,
@@ -78,6 +85,7 @@ export function lastfmLogo(
   const cls = className ? ` class="${className}"` : '';
   return (
     `<g${cls} transform="translate(${x},${Math.round(top * 100) / 100}) scale(${scale.toFixed(5)})" fill="${color}">` +
+    `<rect x="0" y="0" width="${LOGO_W}" height="${LOGO_H}" fill="none" pointer-events="all"/>` +
     `<path d="${LOGO_PATH}"/>` +
     `</g>`
   );

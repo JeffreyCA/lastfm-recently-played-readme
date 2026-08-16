@@ -193,6 +193,56 @@ export function relativeTime(playedAtSeconds: number, nowMs: number): string {
   return `${Math.floor(diff / YEAR)}y ago`;
 }
 
+const MONTH_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
+/**
+ * The exact scrobble time, for the timestamp's tooltip only.
+ *
+ * Stated in UTC and spelled with a month name because the same reasoning that
+ * keeps the visible label relative applies here: the card is rendered
+ * server-side with no idea of the reader's timezone or locale, so a bare
+ * numeric date would be both wrong by up to a day and read as US-formatted to
+ * everyone. Naming the zone makes it merely offset rather than ambiguous.
+ * Built from the UTC getters rather than Intl, which the runtime need not
+ * carry.
+ */
+export function absoluteTime(playedAtSeconds: number): string {
+  const date = new Date(playedAtSeconds * 1000);
+  if (Number.isNaN(date.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return (
+    `${MONTH_NAMES[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()} ` +
+    `at ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())} UTC`
+  );
+}
+
+/**
+ * Tooltip for a track's title and artist lines.
+ *
+ * Both lines are truncated to fit the column, so the tooltip is often the only
+ * place the full text exists; the album is included because it appears nowhere
+ * else on the card at all. The scrobble time deliberately stays out of it -
+ * that belongs to the timestamp, which has its own.
+ */
+export function trackTooltip(track: Track): string {
+  const lines = [track.name, `by ${track.artist}`];
+  if (track.album) lines.push(`from ${track.album}`);
+  return lines.join('\n');
+}
+
 /** 30529 -> "30,529". Avoids depending on Intl being present in the runtime. */
 export function formatCount(n: number): string {
   return String(Math.max(0, Math.floor(n))).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -228,6 +278,11 @@ interface TextOptions {
   anchor?: 'start' | 'end';
   className?: string;
   tracking?: number;
+  /**
+   * Native tooltip, shown wherever the SVG is interactive. Inert inside an
+   * <img> like every other hover affordance here, so nothing may depend on it.
+   */
+  tooltip?: string;
 }
 
 /** Every piece of text in the card goes through here, so escaping is uniform. */
@@ -235,7 +290,7 @@ function text(
   content: string,
   x: number,
   baseline: number,
-  { size, fill, weight, anchor, className, tracking }: TextOptions,
+  { size, fill, weight, anchor, className, tracking, tooltip }: TextOptions,
 ): string {
   return (
     `<text${className ? ` class="${className}"` : ''} x="${round(x)}" y="${round(baseline)}"` +
@@ -243,7 +298,11 @@ function text(
     ` font-family="${FONT_STACK}" font-size="${size}"` +
     `${weight ? ` font-weight="${weight}"` : ''}` +
     `${tracking ? ` letter-spacing="${tracking}"` : ''}` +
-    ` fill="${fill}">${escapeXml(content)}</text>`
+    ` fill="${fill}">` +
+    // <title> is metadata, not rendered content, so it can sit inside <text>
+    // without affecting the glyphs.
+    `${tooltip ? `<title>${escapeXml(tooltip)}</title>` : ''}` +
+    `${escapeXml(content)}</text>`
   );
 }
 
@@ -622,6 +681,9 @@ function renderRow(
       size: META_SIZE,
       fill: theme.meta,
       anchor: 'end',
+      // The label is relative because an absolute one cannot be localised
+      // server-side; the exact time is still worth having on hover.
+      tooltip: `Scrobbled ${absoluteTime(track.playedAt)}`,
     });
   }
 
@@ -656,17 +718,25 @@ function renderRow(
   // The title links where the SVG is interactive (direct view, <object>,
   // inline). GitHub embeds it through an <img>, which is inert - the link is
   // ignored there rather than breaking anything.
+  const tooltip = trackTooltip(track);
   const titleSvg = text(title, textX, titleBaseline, {
     size: TITLE_SIZE,
     weight: 600,
     fill: theme.title,
     className: `${idPrefix}-t`,
+    tooltip,
   });
   const href = safeTrackUrl(track.url);
 
   parts.push(
     href ? link(href, titleSvg, `${idPrefix}-a`) : titleSvg,
-    text(artist, textX, artistBaseline, { size: ARTIST_SIZE, fill: theme.artist }),
+    text(artist, textX, artistBaseline, {
+      size: ARTIST_SIZE,
+      fill: theme.artist,
+      // The artist line is truncated on the same terms as the title, so it
+      // gets the same description rather than a shorter one.
+      tooltip,
+    }),
     metaSvg,
   );
 

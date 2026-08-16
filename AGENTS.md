@@ -41,6 +41,7 @@ GitHub renders the card inside an `<img>`, proxied by Camo. Almost every design 
 - **Color swatches are bound to `change`, not `input`.** A native picker fires continuously while dragging and every preview is a request to the Worker.
 - `THEME_COLORS` mirrors each theme's settable colors from `render/themes.ts`. Update both together, or an untouched picker shows a color the card isn't using.
 - The form is a fixed 500px and the preview takes the remaining width, because the card can be up to 1000px wide and the form cannot usefully use more. Card height changes with track count, but the preview is in its own column, so it never reflows the form.
+- **The snippet sits above the preview, at the top of the right column, and the whole column is sticky.** It is the one thing the page exists to produce, so it stays in view while the options are worked through; below the form it was off the bottom of the screen at the moment it mattered. The image URL has no visible box of its own - `Copy URL` reads it from state, because a second code box repeats most of a string already on screen.
 
 ## Gotchas
 

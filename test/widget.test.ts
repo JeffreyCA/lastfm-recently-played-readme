@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { isAllowedArtUrl } from '../src/art';
 import { parseRecentTracks } from '../src/lastfm';
 import { OptionsError, parseHexColor, parseOptions } from '../src/options';
-import { relativeTime, renderCard, safeTrackUrl } from '../src/render/card';
+import {
+  absoluteTime,
+  relativeTime,
+  renderCard,
+  safeTrackUrl,
+  trackTooltip,
+} from '../src/render/card';
 import { THEME_NAMES } from '../src/render/themes';
 import type { Track } from '../src/lastfm';
 import type { LovedMode, WidgetOptions } from '../src/options';
@@ -217,6 +223,26 @@ describe('parseRecentTracks', () => {
     );
     expect(messy[0]!.name).toBe('Unknown track');
     expect(parseRecentTracks(JSON.stringify({ recenttracks: {} }), 10)).toEqual([]);
+  });
+});
+
+describe('tooltips', () => {
+  it('states an unambiguous UTC instant', () => {
+    expect(absoluteTime(1_700_000_000)).toBe('Nov 14, 2023 at 22:13 UTC');
+  });
+
+  it('describes the track, dropping parts it does not have', () => {
+    expect(trackTooltip(tracks[1]!)).toBe(
+      '\u{1F3B5} a very long title that will certainly need truncating somewhere\nby Someone',
+    );
+    // No album on these fixtures, and the scrobble time stays on the timestamp.
+    expect(trackTooltip(tracks[0]!)).toBe('Fitter Happier & "Co." <b>\nby A\u2019B & C');
+  });
+
+  it('escapes tooltip text into the document', () => {
+    const svg = renderCard({ options, tracks, art: [null, null] });
+    expect(svg).toContain('<title>Fitter Happier &amp; &quot;Co.&quot; &lt;b&gt;');
+    expect(svg).toContain('<title>Scrobbled Nov 14, 2023 at 22:13 UTC</title>');
   });
 });
 

@@ -180,7 +180,6 @@ const out = {
   width: el('width-out'),
   radius: el('radius-out'),
   snippet: el('snippet-out'),
-  url: el('url-out'),
   userError: el('user-error'),
   colorStatus: el('color-status'),
   colorCount: el('color-count'),
@@ -192,6 +191,13 @@ const out = {
 };
 
 let activeTab = 'markdown';
+
+/**
+ * The image URL behind the current snippet. Held here rather than printed a
+ * second time: "Copy URL" is the only thing that ever needed it, and a second
+ * code box saying almost what the first one says is noise.
+ */
+let currentUrl = '';
 
 /** The controls as they stand, before the artist/timestamp link is applied. */
 function readRawState() {
@@ -532,7 +538,7 @@ function render() {
 
   if (!valid) {
     out.snippet.textContent = 'Enter a username';
-    out.url.textContent = '-';
+    currentUrl = '';
     out.copy.disabled = true;
     out.copyUrl.disabled = true;
     out.preview.hidden = true;
@@ -543,7 +549,7 @@ function render() {
 
   const url = buildUrl(state);
   out.snippet.textContent = buildSnippet(state);
-  out.url.textContent = url;
+  currentUrl = url;
   out.copy.disabled = false;
   out.copyUrl.disabled = false;
   schedulePreview(url);
@@ -635,7 +641,7 @@ for (const tab of document.querySelectorAll('.tab')) {
 }
 
 out.copy.addEventListener('click', () => copyText(out.snippet.textContent, out.copy));
-out.copyUrl.addEventListener('click', () => copyText(out.url.textContent, out.copyUrl));
+out.copyUrl.addEventListener('click', () => copyText(currentUrl, out.copyUrl));
 
 // The sample username is there to be replaced, so selecting it on first focus
 // saves clearing the field by hand. Only while it is untouched - once someone
