@@ -1,10 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "fluid": true,
   "git": {
     "deploymentEnabled": {
-      "main": false,
-      "cf-rewrite": false
+      "main": false
     }
   },
   "functions": {

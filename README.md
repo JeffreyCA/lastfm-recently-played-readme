@@ -44,6 +44,8 @@ Where the old endpoint answered a bad value with HTTP 400 and a JSON body — wh
 
 `api/index.ts` is the whole thing: one Vercel Function using the [`fetch` Web Standard export](https://vercel.com/docs/functions/functions-api-reference#fetch-web-standard), with no dependencies and no build step. `api/_translate.ts` holds the parameter mapping — files in `/api` starting with `_` aren't turned into functions, so it stays a plain module.
 
+It runs on [fluid compute](https://vercel.com/docs/fluid-compute), which suits it: the function spends nearly all its time waiting on one outbound request, and sharing an instance across concurrent invocations means that idle time isn't billed per request. This is only safe because nothing here keeps mutable module-level state — concurrent invocations share globals.
+
 Two constraints come from GitHub rendering the card through its Camo image proxy, and they account for most of the code:
 
 - **Never answer with a 4xx.** Camo shows it as a broken image and caches the failure. If the Worker can't be reached, this returns a small fallback card at HTTP 200 with a 10 second TTL.
