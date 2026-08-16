@@ -279,6 +279,11 @@ interface TextOptions {
   className?: string;
   tracking?: number;
   /**
+   * Pins the rendered advance to the same width used by surrounding layout.
+   * Use only when a non-text sibling depends on an estimated text width.
+   */
+  textLength?: number;
+  /**
    * Native tooltip, shown wherever the SVG is interactive. Inert inside an
    * <img> like every other hover affordance here, so nothing may depend on it.
    */
@@ -289,15 +294,25 @@ interface TextOptions {
 function text(
   content: string,
   x: number,
-  baseline: number,
-  { size, fill, weight, anchor, className, tracking, tooltip }: TextOptions,
+  y: number,
+  {
+    size,
+    fill,
+    weight,
+    anchor,
+    className,
+    tracking,
+    textLength,
+    tooltip,
+  }: TextOptions,
 ): string {
   return (
-    `<text${className ? ` class="${className}"` : ''} x="${round(x)}" y="${round(baseline)}"` +
+    `<text${className ? ` class="${className}"` : ''} x="${round(x)}" y="${round(y)}"` +
     `${anchor === 'end' ? ' text-anchor="end"' : ''}` +
     ` font-family="${FONT_STACK}" font-size="${size}"` +
     `${weight ? ` font-weight="${weight}"` : ''}` +
     `${tracking ? ` letter-spacing="${tracking}"` : ''}` +
+    `${textLength !== undefined ? ` textLength="${round(textLength)}" lengthAdjust="spacing"` : ''}` +
     ` fill="${fill}">` +
     // <title> is metadata, not rendered content, so it can sit inside <text>
     // without affecting the glyphs.
@@ -388,42 +403,38 @@ function usesGutter(mode: LovedMode): boolean {
 }
 
 /**
- * Visual bounds of the header's contents relative to its shared text
- * baseline.
+ * Visual bounds of the header's contents relative to its shared baseline.
  *
- * The header is measured rather than given a fixed height so that it is
- * balanced by construction: whatever it contains, SECTION_PAD above the
- * highest ink and SECTION_PAD below the lowest leaves equal space either
- * side. A fixed band centred the *box* instead, which left the contents
- * visibly riding high, because the wordmark's ascenders reach higher than
- * the title's capitals while nothing reaches as low as the box's bottom.
+ * The band is symmetric about the title's cap-to-baseline center. The logo,
+ * title and username keep one typographic baseline, while the avatar is
+ * centered on the same optical line. Taking the largest reach on either side
+ * keeps the cluster centered without platform-specific SVG baseline keywords.
  */
 function headerExtent(options: WidgetOptions): { top: number; bottom: number } {
-  // The title and the username share a baseline, so both are measured from it.
-  let top = -CAP_RATIO * Math.max(HEADER_TITLE_SIZE, USER_SIZE);
-  let bottom = DESC_RATIO * Math.max(HEADER_TITLE_SIZE, USER_SIZE);
+  const center = -(CAP_RATIO * HEADER_TITLE_SIZE) / 2;
+  const spans: Array<[number, number]> = [[-CAP_RATIO * HEADER_TITLE_SIZE, 0]];
 
   if (options.logo) {
-    top = Math.min(top, -logoAscent(LOGO_H));
-    bottom = Math.max(bottom, logoDescent(LOGO_H));
+    spans.push([-logoAscent(LOGO_H), logoDescent(LOGO_H)]);
   }
 
-  if (options.avatar && options.profile === 'header') {
-    // The avatar is centred on the title's visual middle so the two read as
-    // one line rather than the avatar floating.
-    const centre = (-CAP_RATIO * HEADER_TITLE_SIZE + DESC_RATIO * HEADER_TITLE_SIZE) / 2;
-    top = Math.min(top, centre - AVATAR_SIZE / 2);
-    bottom = Math.max(bottom, centre + AVATAR_SIZE / 2);
+  if (options.profile === 'header') {
+    if (options.username) spans.push([-CAP_RATIO * USER_SIZE, 0]);
+    if (options.avatar) spans.push([center - AVATAR_SIZE / 2, center + AVATAR_SIZE / 2]);
   }
 
-  return { top, bottom };
+  let half = 0;
+  for (const [top, bottom] of spans) {
+    half = Math.max(half, center - top, bottom - center);
+  }
+
+  return { top: center - half, bottom: center + half };
 }
 
 function renderHeader(ctx: Ctx, baseline: number, avatarImage: string | null): string {
   const { theme, options, idPrefix, rightEdge } = ctx;
   const parts: string[] = [];
-  // Vertical middle of the title's glyphs; the avatar aligns to this.
-  const titleMidY = baseline - ((CAP_RATIO - DESC_RATIO) / 2) * HEADER_TITLE_SIZE;
+  const avatarCenterY = capCentre(baseline, HEADER_TITLE_SIZE);
 
   // Right: the profile, when it lives here. `avatar` and `username` say what
   // it contains; `profile` says where it goes.
@@ -438,7 +449,7 @@ function renderHeader(ctx: Ctx, baseline: number, avatarImage: string | null): s
   let identity = '';
   if (showAvatar) {
     const cx = rightEdge - nameWidth - avatarGap - AVATAR_SIZE / 2;
-    identity += avatarTile(avatarImage, cx, titleMidY, ctx);
+    identity += avatarTile(avatarImage, cx, avatarCenterY, ctx);
     rightUsed += avatarGap + AVATAR_SIZE;
   }
   if (showName) {
@@ -448,6 +459,7 @@ function renderHeader(ctx: Ctx, baseline: number, avatarImage: string | null): s
       fill: theme.title,
       anchor: 'end',
       className: `${idPrefix}-u`,
+      textLength: showAvatar ? nameWidth : undefined,
     });
   }
   if (identity) {
@@ -463,7 +475,7 @@ function renderHeader(ctx: Ctx, baseline: number, avatarImage: string | null): s
     );
   }
 
-  // Left: wordmark then title, sharing a baseline so the two read as one line.
+  // Left: wordmark then title, sharing the same baseline as the username.
   let titleX = PAD_X;
   if (options.logo) {
     parts.push(
@@ -479,11 +491,16 @@ function renderHeader(ctx: Ctx, baseline: number, avatarImage: string | null): s
 
   const available = rightEdge - titleX - rightUsed - 12;
   parts.push(
-    text(truncateToWidth('Recently Played', HEADER_TITLE_SIZE, available, 600), titleX, baseline, {
-      size: HEADER_TITLE_SIZE,
-      weight: 600,
-      fill: theme.title,
-    }),
+    text(
+      truncateToWidth('Recently Played', HEADER_TITLE_SIZE, available, 600),
+      titleX,
+      baseline,
+      {
+        size: HEADER_TITLE_SIZE,
+        weight: 600,
+        fill: theme.title,
+      },
+    ),
   );
 
   return parts.join('');
@@ -590,34 +607,30 @@ function renderStatsCompact(ctx: Ctx, top: number, user: UserInfo | null | undef
   );
   const pairWidths = columns.map((_, i) => valueWidths[i]! + COMPACT_PAIR_GAP + labelWidths[i]!);
 
-  const { count, total } = fitItems(pairWidths, ctx.width - PAD_X * 2, COMPACT_GROUP_GAP);
+  const { count } = fitItems(pairWidths, ctx.width - PAD_X * 2, COMPACT_GROUP_GAP);
   if (count === 0) return EMPTY_SECTION;
 
-  const parts: string[] = [];
-  let x = (ctx.width - total) / 2;
-
+  const spans: string[] = [];
   for (let i = 0; i < count; i++) {
     const col = columns[i]!;
-    parts.push(
-      text(col.value, x, baseline, {
-        size: COMPACT_VALUE_SIZE,
-        weight: 600,
-        fill: ctx.theme.title,
-      }),
+    if (i > 0) {
+      spans.push(
+        `<tspan textLength="${COMPACT_GROUP_GAP}" lengthAdjust="spacingAndGlyphs">&#160;</tspan>`,
+      );
+    }
+    spans.push(
+      `<tspan font-size="${COMPACT_VALUE_SIZE}" fill="${ctx.theme.title}">${escapeXml(col.value)}</tspan>`,
+      `<tspan textLength="${COMPACT_PAIR_GAP}" lengthAdjust="spacingAndGlyphs">&#160;</tspan>`,
+      `<tspan font-size="${COMPACT_LABEL_SIZE}" letter-spacing="${STATS_TRACKING}" fill="${ctx.theme.meta}">${escapeXml(col.label)}</tspan>`,
     );
-    x += valueWidths[i]! + COMPACT_PAIR_GAP;
-    parts.push(
-      text(col.label, x, baseline, {
-        size: COMPACT_LABEL_SIZE,
-        weight: 600,
-        fill: ctx.theme.meta,
-        tracking: STATS_TRACKING,
-      }),
-    );
-    x += labelWidths[i]! + COMPACT_GROUP_GAP;
   }
 
-  return { svg: parts.join(''), height };
+  return {
+    svg:
+      `<text x="${round(ctx.width / 2)}" y="${round(baseline)}" text-anchor="middle"` +
+      ` font-family="${FONT_STACK}" font-weight="600">${spans.join('')}</text>`,
+    height,
+  };
 }
 
 function renderRow(
@@ -768,17 +781,26 @@ function renderFooterProfile(
 
   const nameWidth = showName ? estimateWidth(options.user, USER_SIZE, 600) : 0;
   const gap = showAvatar && showName ? AVATAR_GAP : 0;
-  const total = (showAvatar ? AVATAR_SIZE : 0) + gap + nameWidth;
-  const startX = align === 'left' ? PAD_X : ctx.rightEdge - total;
+  const avatarX =
+    align === 'left' ? PAD_X : ctx.rightEdge - (showName ? nameWidth + gap : 0) - AVATAR_SIZE;
+  const nameX =
+    align === 'left' ? PAD_X + (showAvatar ? AVATAR_SIZE + gap : 0) : ctx.rightEdge;
 
   let body = '';
-  if (showAvatar) body += avatarTile(avatarImage, startX + AVATAR_SIZE / 2, midY, ctx);
+  if (showAvatar) body += avatarTile(avatarImage, avatarX + AVATAR_SIZE / 2, midY, ctx);
   if (showName) {
     body += text(
       options.user,
-      startX + (showAvatar ? AVATAR_SIZE + gap : 0),
+      nameX,
       centredBaseline(midY, USER_SIZE),
-      { size: USER_SIZE, weight: 600, fill: theme.title, className: `${idPrefix}-u` },
+      {
+        size: USER_SIZE,
+        weight: 600,
+        fill: theme.title,
+        anchor: align === 'right' ? 'end' : undefined,
+        className: `${idPrefix}-u`,
+        textLength: align === 'right' && showAvatar ? nameWidth : undefined,
+      },
     );
   }
 
@@ -860,12 +882,10 @@ export function renderCard({
   let statsShown = false;
 
   if (options.header) {
-    // Place the baseline so the content's highest ink lands on `y`. Both ends
-    // are snapped to whole pixels: fractional positions would put the 1px
-    // rules across a pixel boundary and render them soft.
     const extent = headerExtent(options);
     const baseline = Math.round(y - extent.top);
     body.push(renderHeader(ctx, baseline, avatarImage ?? null));
+    // Section boundaries stay on whole pixels so their 1px rules remain crisp.
     y = Math.round(baseline + extent.bottom);
   }
 
