@@ -128,6 +128,38 @@ export const THEMES = {
     divider: '#8b949e33',
     titleHover: '#d51007',
   },
+  dracula: {
+    bg: '#282a36',
+    border: '#44475a',
+    title: '#f8f8f2',
+    artist: '#bd93f9',
+    // Lifted off Dracula's #6272a4 comment colour, which is built to recede in
+    // code and left the timestamp at 3.0 against the card. This is that colour
+    // toward the foreground, so it stays in the palette's family.
+    meta: '#808db4',
+    accent: '#ff79c6',
+    placeholder: '#343746',
+    placeholderInk: '#585961',
+    loved: '#ff5555',
+    lovedOff: '#5e353e',
+    divider: '#393a45',
+    titleHover: '#ff79c6',
+  },
+  tokyonight: {
+    bg: '#1a1b26',
+    border: '#2c2e3d',
+    title: '#c0caf5',
+    artist: '#7aa2f7',
+    /** Lifted off #565f89 for the same reason as Dracula's. */
+    meta: '#767fa9',
+    accent: '#bb9af7',
+    placeholder: '#272937',
+    placeholderInk: '#404356',
+    loved: '#f7768e',
+    lovedOff: '#513240',
+    divider: '#272937',
+    titleHover: '#bb9af7',
+  },
 } as const satisfies Record<string, Theme>;
 
 export type ThemeName = keyof typeof THEMES;

@@ -40,7 +40,7 @@ Add parameters to the URL, e.g. `?user=JeffreyCA01&theme=light&count=3`.
 | --- | --- | --- | --- |
 | `user` | Whose scrobbles to show | *required* | Last.fm username |
 | `count` | How many tracks. A now-playing track counts as one | `5` | `1`-`10` |
-| `theme` | Color scheme | `dark` | `dark`, `legacy`, `light`, `nord`, `catppuccin`, `transparent` |
+| `theme` | Color scheme | `dark` | `dark`, `legacy`, `light`, `dracula`, `tokyonight`, `nord`, `catppuccin`, `transparent` |
 | `bg_color` | Card background | theme's | hex digits, no `#` - e.g. `212121` |
 | `text_color` | Track titles. Dividers, borders and placeholders follow it | theme's | hex digits, no `#` |
 | `artist_color` | The artist line | theme's | hex digits, no `#` |

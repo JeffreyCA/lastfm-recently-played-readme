@@ -130,6 +130,22 @@ const THEME_COLORS = {
     accent: '#d51007',
     loved: '#d51007',
   },
+  dracula: {
+    bg: '#282a36',
+    title: '#f8f8f2',
+    artist: '#bd93f9',
+    meta: '#808db4',
+    accent: '#ff79c6',
+    loved: '#ff5555',
+  },
+  tokyonight: {
+    bg: '#1a1b26',
+    title: '#c0caf5',
+    artist: '#7aa2f7',
+    meta: '#767fa9',
+    accent: '#bb9af7',
+    loved: '#f7768e',
+  },
 };
 
 const el = (id) => document.getElementById(id);
