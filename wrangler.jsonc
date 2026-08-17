@@ -8,7 +8,10 @@
     "binding": "ASSETS"
   },
   "observability": {
-    "enabled": true
+    "enabled": true,
+    "traces": {
+      "enabled": true
+    }
   },
   // Workers Cache sits in front of the Worker: cacheable responses are served
   // from the edge without running it, and concurrent misses for the same card
