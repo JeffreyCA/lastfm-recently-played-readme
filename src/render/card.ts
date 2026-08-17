@@ -59,10 +59,10 @@ const PAD_X = 16;
  *
  * The card is a stack of sections divided by hairline rules. Every section
  * keeps exactly this much clearance from its boundary, whether that boundary
- * is a rule or the card edge. Two consequences fall out of that and are the
- * reason it is one constant rather than several: the header is centred
- * between the top edge and the first rule by construction, and the gap
- * between two rows is exactly twice this, with the rule centred in it.
+ * is a rule or the card edge. That's why it's one constant rather than
+ * several: the header centres between the top edge and the first rule by
+ * construction, and the gap between two rows is exactly twice this, with the
+ * rule centred in it.
  */
 const SECTION_PAD = 12;
 
@@ -79,9 +79,9 @@ const LINE_GAP = 19;
  * height to the artist's descender. Derived rather than chosen: pick a size
  * independently and the two drift apart whenever a font size changes.
  *
- * It also defines the row height, so that the gaps a reader actually judges -
- * the ones above and below the artwork, which is by far the heaviest element
- * in the row - are the uniform SECTION_PAD.
+ * It also sets the row height, so the gaps a reader actually notices - above
+ * and below the artwork, the heaviest element in the row - stay the uniform
+ * SECTION_PAD.
  */
 const ART_SIZE = Math.round(CAP_RATIO * TITLE_SIZE + LINE_GAP + DESC_RATIO * ARTIST_SIZE);
 const ART_GAP = 12;
@@ -90,10 +90,10 @@ const ART_GAP = 12;
  * Where the title's baseline sits within the row.
  *
  * A text block reads as running from the first line's cap height to the last
- * line's *baseline*: descenders are perceived as hanging below it, not as part
- * of it. So that extent - not the ink extent - is what gets centred on the
- * tile. Hanging the text from the top of the tile instead (the obvious
- * reading of "align them") leaves the artwork looking about 1.4px low.
+ * line's *baseline* - descenders hang below it rather than belonging to it -
+ * so that extent, not the ink extent, is what gets centred on the tile.
+ * Hanging the text from the tile's top instead (the obvious reading of
+ * "align them") leaves the artwork looking about 1.4px low.
  */
 const TITLE_BASELINE_IN_ROW = ART_SIZE / 2 - (LINE_GAP - CAP_RATIO * TITLE_SIZE) / 2;
 
@@ -211,13 +211,12 @@ const MONTH_NAMES = [
 /**
  * The exact scrobble time, for the timestamp's tooltip only.
  *
- * Stated in UTC and spelled with a month name because the same reasoning that
- * keeps the visible label relative applies here: the card is rendered
- * server-side with no idea of the reader's timezone or locale, so a bare
- * numeric date would be both wrong by up to a day and read as US-formatted to
- * everyone. Naming the zone makes it merely offset rather than ambiguous.
- * Built from the UTC getters rather than Intl, which the runtime need not
- * carry.
+ * Stated in UTC and spelled with a month name, for the same reason the
+ * visible label stays relative: the card is rendered server-side with no
+ * idea of the reader's timezone or locale, so a bare numeric date would be
+ * wrong by up to a day and read as US-formatted to everyone. Naming the zone
+ * makes it merely offset rather than ambiguous. Built from the UTC getters
+ * rather than Intl, which the runtime need not carry.
  */
 export function absoluteTime(playedAtSeconds: number): string {
   const date = new Date(playedAtSeconds * 1000);
@@ -232,10 +231,10 @@ export function absoluteTime(playedAtSeconds: number): string {
 /**
  * Tooltip for a track's title and artist lines.
  *
- * Both lines are truncated to fit the column, so the tooltip is often the only
- * place the full text exists; the album is included because it appears nowhere
- * else on the card at all. The scrobble time deliberately stays out of it -
- * that belongs to the timestamp, which has its own.
+ * Truncated lines mean this is often the only place the full text exists, so
+ * the album is included too - it appears nowhere else on the card. The
+ * scrobble time stays out of it deliberately; that belongs to the timestamp,
+ * which has its own.
  */
 export function trackTooltip(track: Track): string {
   const lines = [track.name, `by ${track.artist}`];
@@ -405,10 +404,10 @@ function usesGutter(mode: LovedMode): boolean {
 /**
  * Visual bounds of the header's contents relative to its shared baseline.
  *
- * The band is symmetric about the title's cap-to-baseline center. The logo,
- * title and username keep one typographic baseline, while the avatar is
+ * The band is symmetric about the title's cap-to-baseline center: the logo,
+ * title and username share one typographic baseline, and the avatar is
  * centered on the same optical line. Taking the largest reach on either side
- * keeps the cluster centered without platform-specific SVG baseline keywords.
+ * centers the cluster without platform-specific SVG baseline keywords.
  */
 function headerExtent(options: WidgetOptions): { top: number; bottom: number } {
   const center = -(CAP_RATIO * HEADER_TITLE_SIZE) / 2;
@@ -654,13 +653,13 @@ function renderRow(
 
   if (ctx.gutter) {
     // With artwork the heart sits in a gutter between two blocks, so centring
-    // it in that span is what reads as even; offsetting from the artwork
-    // instead leaves more space on the art side than the text side.
+    // it in that span reads as even - offsetting from the artwork instead
+    // leaves more space on the art side than the text side.
     //
     // Without artwork the heart becomes the row's leading element, and
-    // centring leaves it floating a full PAD_X from the card edge while nearly
-    // touching the title. Align its ink to the text edge instead, so the heart
-    // column lines up with everything else in the left column.
+    // centring leaves it floating a full PAD_X from the card edge while
+    // nearly touching the title. Align its ink to the text edge instead, so
+    // the heart column lines up with the rest of the left column.
     const cx = options.art
       ? (PAD_X + ART_SIZE + textX) / 2
       : PAD_X - HEART_SIZE * HEART_INK_INSET_RATIO + HEART_SIZE / 2;
@@ -932,8 +931,8 @@ export function renderCard({
 
   // Footer: exactly one thing sits below the tracks. When `profile` puts the
   // picture and username down here, that *is* the footer and `footer` is
-  // ignored - combining them made the card bottom-heavy and the controls
-  // hard to reason about.
+  // ignored - combining them left the card bottom-heavy and the controls
+  // confusing.
   const footerAlign = footerProfileAlign(options.profile);
 
   if (footerAlign || options.footer === 'stats') {
@@ -955,8 +954,8 @@ export function renderCard({
   const height = round(y);
   const altText = buildAltText(tracks);
 
-  // The background now comes from the resolved theme, which has already taken
-  // any caller-supplied color into account - including over `transparent`.
+  // The background comes from the resolved theme, which already accounts for
+  // any caller-supplied color - including over `transparent`.
   const bg = theme.bg;
   const background =
     bg === 'none'

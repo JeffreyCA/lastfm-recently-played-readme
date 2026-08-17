@@ -182,8 +182,8 @@ export const LIMITS = {
 } as const;
 
 export function parseOptions(params: URLSearchParams): WidgetOptions {
-  // Note: `username` is a boolean flag controlling the header, not an alias
-  // for `user`. Keeping both meanings on one name would be ambiguous.
+  // `username` is a boolean flag controlling the header, not an alias for
+  // `user` - keeping both meanings on one name would be ambiguous.
   const user = (params.get('user') ?? '').trim();
 
   if (!user) {

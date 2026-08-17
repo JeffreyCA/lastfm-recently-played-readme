@@ -22,12 +22,10 @@ const WAVE_STRANDS = [
 const MIN_DOT_OPACITY = 0.08;
 
 /**
- * A quiet dot-field wave for the card footer.
- *
- * The reference artwork for this is a dense particle field in near-white on
- * white, which reads as decoration there but shouts on a dark card. So this is
- * a reinterpretation rather than a copy: theme ink at low opacity, strands
- * that fade out at both ends, and no hard edges anywhere.
+ * A quiet dot-field wave for the card footer, reinterpreted from a reference
+ * particle field in near-white on white - decoration there, but it would shout
+ * on a dark card. Theme ink at low opacity, strands that fade out at both
+ * ends, no hard edges anywhere.
  */
 export function waveDecor(
   x: number,

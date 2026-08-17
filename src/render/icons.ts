@@ -60,18 +60,17 @@ export function logoWidth(height: number): number {
 }
 
 /**
- * The wordmark doubles as Last.fm attribution, which is why the visible
- * "Scrobbled via Last.fm" footer is no longer needed.
+ * The wordmark doubles as Last.fm attribution, so the "Scrobbled via Last.fm"
+ * footer is no longer needed.
  *
- * `baseline` is the y the glyphs sit on, so the wordmark can be aligned with
- * adjacent text the same way two pieces of text are aligned with each other.
+ * `baseline` is the y the glyphs sit on, so the wordmark aligns with adjacent
+ * text the way two pieces of text align with each other.
  *
- * The unpainted rect makes the whole wordmark box a hit target. Without it,
- * pointer events follow the glyph outlines themselves, so the link only
- * responds on the strokes of the letters and misses the counters and the gaps
- * between them - which is most of the area a reader aims at. `pointer-events`
- * rather than a transparent fill, because a fill of alpha 0 is not reliably
- * hit-tested and would also have to be kept out of the hover fade.
+ * The unpainted rect makes the whole box a hit target: without it, pointer
+ * events only follow the glyph strokes, missing the counters and gaps - most
+ * of the area a reader aims at. `pointer-events` rather than a transparent
+ * fill, since alpha-0 fills aren't reliably hit-tested and would also need
+ * keeping out of the hover fade.
  */
 export function lastfmLogo(
   x: number,

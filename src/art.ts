@@ -6,9 +6,9 @@ import { ART_BUDGET_MS, MIN_ART_BUDGET_MS } from './util/deadline';
  * Album art has to be inlined as a data URI: GitHub renders the widget inside an
  * <img>, and an SVG in that context cannot load any external resource.
  *
- * Camo's size ceiling is 5 MiB (CAMO_LENGTH_LIMIT) and its socket timeout is
- * ~10s, so the real constraints are our own latency budget and payload sanity,
- * not Camo. We stay far below both.
+ * Camo's ceiling is 5 MiB (CAMO_LENGTH_LIMIT) with a ~10s socket timeout, but
+ * we stay far below both - the real constraints are our own latency budget
+ * and payload sanity.
  */
 
 /**
@@ -26,14 +26,13 @@ const MAX_BYTES_PER_IMAGE = 200 * 1024;
 const NEGATIVE_CACHE_SECONDS = 60;
 
 /**
- * Only Last.fm's own image CDNs are ever fetched. This keeps the endpoint from
- * becoming an open proxy.
+ * Only Last.fm's own image CDNs are fetched - this is the open-proxy boundary.
  *
- * Last.fm has used several hostnames over the years and currently serves art
- * from `lastfm-img.freetls.fastly.net`. Rather than pin one name (which silently
- * breaks all art the moment they rotate it), we accept any `lastfm*` label on
- * their known CDN domains. The label prefix keeps other tenants of the shared
- * `freetls.fastly.net` domain out.
+ * Last.fm currently serves art from `lastfm-img.freetls.fastly.net` but has
+ * rotated hostnames before, silently breaking all art each time. Rather than
+ * pin one name, we accept any `lastfm*` label on their known CDN domains; the
+ * label prefix keeps other tenants of the shared `freetls.fastly.net` domain
+ * out.
  */
 const ALLOWED_ART_HOSTS = new Set([
   'lastfm-img.freetls.fastly.net',
@@ -65,10 +64,10 @@ export function isAllowedArtUrl(raw: string): boolean {
  * Rewrites the size segment of a Last.fm image URL so we download the smallest
  * variant that still looks sharp, instead of a 300px JPEG for a ~34px slot.
  *
- * The multiplier is a deliberate payload/quality tradeoff. This SVG is fetched
- * on every profile view, so bytes matter: at 2.0x a 3-track card weighs ~130 KB,
- * at 1.6x it is ~30 KB. 1.6x snaps the art slot to Last.fm's 64px variant,
- * which is still sharper than the slot on a 1x display and acceptable on 2x.
+ * The multiplier is a payload/quality tradeoff: this SVG is fetched on every
+ * profile view, so bytes matter. At 2.0x a 3-track card weighs ~130 KB, at
+ * 1.6x it is ~30 KB. 1.6x snaps to Last.fm's 64px variant - sharper than the
+ * slot needs on 1x, acceptable on 2x.
  */
 const ART_DPR = 1.6;
 
@@ -109,10 +108,9 @@ async function fetchOne(
     const res = await fetch(url, {
       headers: { Accept: 'image/*' },
       signal: AbortSignal.timeout(timeoutMs),
-      // The allowlist above is the open-proxy boundary, and it only validates
-      // the URL we start with. Following a redirect would fetch a host that
-      // was never checked, so take the 3xx as a response and let the `res.ok`
-      // check below discard it.
+      // The allowlist above only validates the URL we start with; a redirect
+      // would fetch a host that was never checked, so take the 3xx as-is and
+      // let the `res.ok` check below discard it.
       //
       // Must be 'manual', not 'error': workers only implement 'follow' and
       // 'manual', and 'error' throws a TypeError on the edge - which local
@@ -147,8 +145,8 @@ async function fetchOne(
     return dataUri;
   } catch (err) {
     failures.push(err instanceof Error ? err.name : 'unknown');
-    // Timeout, DNS failure, abort - art is decorative, so degrade silently.
-    // Cache the miss briefly so one broken URL doesn't stall every render.
+    // Timeout, DNS failure, abort - degrade silently, and cache the miss
+    // briefly so one broken URL doesn't stall every render.
     await cachePut(key, '', NEGATIVE_CACHE_SECONDS, ctx);
     return null;
   }
@@ -193,8 +191,8 @@ export async function inlineArt({
     urls.map((url) => {
       if (!url) return Promise.resolve(null);
       if (!isAllowedArtUrl(url)) {
-        // Never fetched, so `fetchOne` cannot see it. This is the allowlist
-        // naming a host Last.fm no longer serves from, which is otherwise silent.
+        // Never fetched, so `fetchOne` cannot see it - catches the allowlist
+        // naming a host Last.fm no longer serves from, otherwise silent.
         blockedHosts.add(hostOf(url));
         return Promise.resolve(null);
       }
@@ -204,8 +202,8 @@ export async function inlineArt({
 
   const images = results.map((r) => (r.status === 'fulfilled' ? r.value : null));
 
-  // Aggregated, not one line per cover: a broken CDN fails every image on every
-  // request, and that is when volume must not multiply by the track count.
+  // Aggregated, not one line per cover: a broken CDN fails every image on
+  // every request, so volume must not multiply by track count.
   const missing = images.filter((image, i) => urls[i] && image === null).length;
   if (missing > 0) {
     logWarn('art', {

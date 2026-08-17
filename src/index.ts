@@ -49,12 +49,12 @@ function svgResponse(
     'Content-Type': 'image/svg+xml; charset=utf-8',
     // Matches the upstream Last.fm TTL, so the edge never holds a card longer
     // than the data behind it was going to be reused anyway. `no-cache` would
-    // be fresher, but it forces a Worker run per view: Workers Cache can only
-    // serve - and only collapses concurrent requests - for responses it is
-    // allowed to reuse without revalidating.
+    // be fresher, but it forces a Worker run per view: Workers Cache only
+    // serves - and only collapses concurrent requests for - responses it can
+    // reuse without revalidating.
     //
-    // `stale-while-revalidate` means the refresh happens behind a reader
-    // rather than in front of them, so a scrobble never costs anyone a wait.
+    // `stale-while-revalidate` refreshes behind the reader rather than in
+    // front of them, so a scrobble never costs anyone a wait.
     'Cache-Control': `public, max-age=${maxAgeSeconds}, stale-while-revalidate=${maxAgeSeconds * 5}`,
     ETag: etag,
     'X-Content-Type-Options': 'nosniff',

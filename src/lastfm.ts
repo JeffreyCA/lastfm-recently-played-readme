@@ -105,9 +105,8 @@ function normalizeTrack(raw: RawTrack): Track {
 }
 
 /**
- * Last.fm returns `track` as a bare object rather than an array when the result
- * contains exactly one item. Normalising this is not optional - it is the single
- * most common cause of crashes in clients for this API.
+ * Last.fm returns `track` as a bare object, not an array, when the result has
+ * exactly one item - the most common cause of crashes in clients for this API.
  */
 function toArray(value: unknown): RawTrack[] {
   if (Array.isArray(value)) return value as RawTrack[];
@@ -141,12 +140,11 @@ async function callApi(
 
   const body = await response.text();
 
-  // Last.fm signals application errors with a 200 body *and* with 4xx codes,
-  // depending on the error. Parse first, then decide.
+  // Last.fm signals application errors with both a 200 body and 4xx codes, so
+  // parse before deciding.
   //
-  // The body is returned as a string rather than the parsed object because
-  // that is what gets cached, so callers parse it again on a miss. Threading
-  // both through would save one parse per miss at the cost of two code paths.
+  // The body is cached as a string, not the parsed object, so callers parse it
+  // again on a miss - one extra parse, but one fewer code path.
   let parsed: unknown;
   try {
     parsed = JSON.parse(body);
@@ -156,7 +154,7 @@ async function callApi(
 
   const asError = parsed as { error?: number; message?: string };
   if (typeof asError?.error === 'number') {
-    // 6 = "User not found" is by far the most common and deserves a clear message.
+    // 6 = "User not found" - the most common case, and worth a clear message.
     const message = asError.error === 6 ? 'User not found' : (asError.message ?? 'Last.fm error');
     throw new LastfmError(message, asError.error);
   }
