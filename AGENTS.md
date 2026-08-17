@@ -71,6 +71,19 @@ GitHub renders the card inside an `<img>`, proxied by Camo. Almost every design 
 - Text is centred on its cap-to-baseline extent, not its ink - descenders read as overhang.
 - `icons.ts` is fixed artwork; `decor.ts` is generated graphics sized to the space it's given. `measure.ts` holds advance widths for the stack in `font.ts`, so those two move together.
 
+## Logging
+
+`src/log.ts` is the only place `console.*` is called. Workers Logs indexes the **fields of an object**, so every call passes one object and never a formatted string - `console.log('art failed', url)` is greppable text, `logWarn('art', { failed: 2 })` is a column. Event and field names are shared with the Spotify Worker, so one query covers both.
+
+Nothing is logged that the platform already has. The invocation log carries the method, URL, query, status, colo, country, user agent and wall/CPU time; `observability.traces` times every subrequest. What neither can see is whether the card *worked*, because an error card is a valid SVG at HTTP 200 - from the outside every failure looks like a success. That is what the `card` event is for, and why it fires on success too: "what fraction of cards failed" is unanswerable from a log that only fires on failure.
+
+- **`card`** - one line per request, always, with the exception folded in rather than emitted as a second row. `outcome`, `reason`, `client`, `user`, `path`, `ms`, `tracks`.
+- **`art`** - only when a cover is missing, and aggregated: one line per `inlineArt` call rather than one per cover, because a broken CDN fails every image on every request and volume must not multiply by the track count exactly then. Note the tracks and the avatar are two separate calls here (they need different sizes), so a request can produce two - distinguishable by `total`, which is always 1 for the avatar. `blocked_hosts` is the one that catches the `isAllowedArtUrl` gotcha above, which is otherwise entirely silent.
+
+`client` collapses the user agent to `vercel` / `camo` / `browser` / `other`, so "how much traffic still comes through the old Vercel deployment" is a group-by rather than four text matches. Vercel is checked first and beats Camo: a README embedding the Vercel URL goes reader → Camo → Vercel → here, and the question is which deployment the markdown points at.
+
+`level` is the alerting surface: `error` means the *service* is broken (`not_configured`, `unhandled`), `warn` means this one request could not be served. Upstream failures stay at `warn` deliberately - a Last.fm outage is real, but no deploy fixes it and it would drown the genuine faults.
+
 ## Testing
 
 Deliberately minimal and it should stay that way while the design is still moving. It covers what fails *silently*: well-formed and escaped SVG, untrusted input (track URLs, art hosts, usernames), the upstream response shapes, the HTTP contract, and the color maths - a wrong mix ratio or a dropped contrast check produces a card that renders perfectly and just looks wrong.

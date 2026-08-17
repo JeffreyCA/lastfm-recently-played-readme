@@ -152,7 +152,13 @@ export interface WidgetOptions {
  */
 const USERNAME_RE = /^[a-zA-Z][a-zA-Z0-9_-]{1,29}$/;
 
-export class OptionsError extends Error {}
+export class OptionsError extends Error {
+  constructor(message: string) {
+    super(message);
+    // Logged as the `err` field; without this every error class reads 'Error'.
+    this.name = 'OptionsError';
+  }
+}
 
 function clampInt(raw: string | null, fallback: number, min: number, max: number): number {
   if (raw === null || raw.trim() === '') return fallback;

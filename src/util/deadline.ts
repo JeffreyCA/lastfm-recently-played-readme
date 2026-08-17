@@ -42,8 +42,11 @@ export const TOTAL_BUDGET_MS = 8000;
 /** Last.fm can be slow; give it the majority of the budget. */
 export const LASTFM_BUDGET_MS = 5000;
 
-/** Album art is decorative and fetched in parallel. */
-export const ART_BUDGET_MS = 4500;
+/**
+ * Album art is decorative and fetched in parallel. Keep this below the shared
+ * budget so cached/fast Last.fm responses leave time to tolerate a slow CDN.
+ */
+export const ART_BUDGET_MS = 5000;
 
 /** Below this, skip art entirely rather than risk blowing the budget. */
 export const MIN_ART_BUDGET_MS = 600;

@@ -2,6 +2,7 @@ import { Hono, type Context } from 'hono';
 import { inlineArt } from './art';
 import type { WaitUntilCtx } from './cache';
 import { getRecentTracks, getUserInfo, LastfmError, type UserInfo } from './lastfm';
+import { logCard, startCard, type CardReason } from './log';
 import { LIMITS, OptionsError, parseOptions } from './options';
 import { ART_DISPLAY_PX, renderCard } from './render/card';
 import { renderErrorCard } from './render/error';
@@ -26,16 +27,6 @@ const app = new Hono<{ Bindings: Env }>();
 function intVar(raw: string | undefined, fallback: number): number {
   const n = Number.parseInt(raw ?? '', 10);
   return Number.isFinite(n) && n >= 0 ? n : fallback;
-}
-
-/**
- * Camo identifies itself in `Via` / `User-Agent`. Useful for telling
- * README-embedded traffic apart from configurator previews in logs.
- */
-function isCamo(request: Request): boolean {
-  const via = request.headers.get('via') ?? '';
-  const ua = request.headers.get('user-agent') ?? '';
-  return /camo/i.test(via) || /camo/i.test(ua);
 }
 
 /**
@@ -104,7 +95,20 @@ function clamp(raw: string | null, limit: { min: number; max: number; default: n
 
 async function handleWidget(c: Context<{ Bindings: Env }>): Promise<Response> {
   const request = c.req.raw;
-  const params = new URL(c.req.url).searchParams;
+  const url = new URL(c.req.url);
+  const params = url.searchParams;
+  const trace = startCard(request, url);
+
+  // Every rendered failure exits through here, so `card` fires exactly once.
+  const fail = (
+    reason: CardReason,
+    message: string,
+    hint?: string,
+    err?: unknown,
+  ): Response => {
+    logCard(trace, { outcome: 'error', reason, err });
+    return errorResponse(request, message, hint, params);
+  };
 
   let ctx: WaitUntilCtx | undefined;
   try {
@@ -119,11 +123,10 @@ async function handleWidget(c: Context<{ Bindings: Env }>): Promise<Response> {
     const deadline = new Deadline(TOTAL_BUDGET_MS);
 
     if (!c.env.LASTFM_API_KEY) {
-      return errorResponse(
-        request,
+      return fail(
+        'not_configured',
         'Service not configured',
         'Missing LASTFM_API_KEY on the server',
-        params,
       );
     }
 
@@ -161,11 +164,10 @@ async function handleWidget(c: Context<{ Bindings: Env }>): Promise<Response> {
     ]);
 
     if (tracks.length === 0) {
-      return errorResponse(
-        request,
+      return fail(
+        'no_tracks',
         'No recent tracks',
         `${options.user} has not scrobbled anything yet`,
-        params,
       );
     }
 
@@ -203,22 +205,23 @@ async function handleWidget(c: Context<{ Bindings: Env }>): Promise<Response> {
       user: profile,
       avatarImage: avatarImages[0] ?? null,
     });
+    logCard(trace, { outcome: 'ok', tracks: tracks.length });
     return svgResponse(svg, `W/"${hash(svg)}"`, request, upstreamCache);
   } catch (err) {
     if (err instanceof OptionsError) {
-      return errorResponse(request, err.message, 'Check the ?user= parameter', params);
+      return fail('bad_options', err.message, 'Check the ?user= parameter', err);
     }
     if (err instanceof LastfmError) {
-      const hint =
-        err.code === 6 ? 'Check the spelling of the Last.fm username' : 'Try again in a moment';
-      return errorResponse(request, err.message, hint, params);
+      const notFound = err.code === 6;
+      return fail(
+        notFound ? 'user_not_found' : 'upstream',
+        err.message,
+        notFound ? 'Check the spelling of the Last.fm username' : 'Try again in a moment',
+        err,
+      );
     }
 
-    console.error('Unhandled widget error', {
-      message: err instanceof Error ? err.message : String(err),
-      camo: isCamo(request),
-    });
-    return errorResponse(request, 'Something went wrong', 'Try again in a moment', params);
+    return fail('unhandled', 'Something went wrong', 'Try again in a moment', err);
   }
 }
 
