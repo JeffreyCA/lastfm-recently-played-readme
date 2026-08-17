@@ -179,7 +179,11 @@ export async function inlineArt({
   if (timeoutMs < MIN_ART_BUDGET_MS) {
     // Means upstream ate the whole budget - the number to tune if it recurs.
     if (wanted > 0) {
-      logWarn('art', { skipped: 'deadline', total: wanted, budget_ms: Math.round(timeoutMs) });
+      logWarn('art', `art skipped, no budget left: ${wanted} covers`, {
+        skipped: 'deadline',
+        total: wanted,
+        budget_ms: Math.round(timeoutMs),
+      });
     }
     return urls.map(() => null);
   }
@@ -206,7 +210,7 @@ export async function inlineArt({
   // every request, so volume must not multiply by track count.
   const missing = images.filter((image, i) => urls[i] && image === null).length;
   if (missing > 0) {
-    logWarn('art', {
+    logWarn('art', `art: ${missing} of ${wanted} covers failed`, {
       total: wanted,
       failed: missing,
       errors: [...new Set(failures)],

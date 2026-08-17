@@ -73,7 +73,9 @@ GitHub renders the card inside an `<img>`, proxied by Camo. Almost every design 
 
 ## Logging
 
-`src/log.ts` is the only place `console.*` is called. Workers Logs indexes the **fields of an object**, so every call passes one object and never a formatted string - `console.log('art failed', url)` is greppable text, `logWarn('art', { failed: 2 })` is a column. Event and field names are shared with the Spotify Worker, so one query covers both.
+`src/log.ts` is the only place `console.*` is called. Workers Logs indexes the **fields of an object**, so every call passes one object and never a formatted string - `console.log('art failed', url)` is greppable text, `logWarn('art', msg, { failed: 2 })` is a column. Event and field names are shared with the Spotify Worker, so one query covers both.
+
+Every call also passes a **`message`**, and it is a required parameter rather than an optional field. The fields are what you query; `message` is what the dashboard renders in its default column, and that column is blank for a log that carries only fields. Keep it a readable one-liner - `card ok: rj via camo, 3 tracks` - since the fields already carry the same values in queryable form.
 
 Nothing is logged that the platform already has. The invocation log carries the method, URL, query, status, colo, country, user agent and wall/CPU time; `observability.traces` times every subrequest. What neither can see is whether the card *worked*, because an error card is a valid SVG at HTTP 200 - from the outside every failure looks like a success. That is what the `card` event is for, and why it fires on success too: a log that only fires on failure can't answer "what fraction of cards failed."
 
