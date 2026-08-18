@@ -143,17 +143,19 @@ describe('untrusted input', () => {
     }
   });
 
-  it('rejects usernames that cannot exist on Last.fm', () => {
-    for (const bad of ['', 'a', '1abc', 'has space', 'inject<svg>', '../etc']) {
+  it('accepts legacy Last.fm username shapes', () => {
+    for (const user of ['a', '12', '_a', '-ozh-', '.ash', '-', '~']) {
+      expect(parseOptions(new URLSearchParams({ user })).user).toBe(user);
+    }
+  });
+
+  it('rejects missing, overlong, and control-character usernames', () => {
+    for (const bad of ['', `line\nbreak`, `null\0byte`, 'x'.repeat(101)]) {
       expect(() => parseOptions(new URLSearchParams(`user=${encodeURIComponent(bad)}`))).toThrow(
         OptionsError,
       );
     }
     expect(parseOptions(new URLSearchParams('user=rj&count=999')).count).toBe(10);
-  });
-
-  it('accepts usernames that start with an underscore', () => {
-    expect(parseOptions(new URLSearchParams('user=_usr_')).user).toBe('_usr_');
   });
 
   it('only accepts strict hex colors for the background', () => {

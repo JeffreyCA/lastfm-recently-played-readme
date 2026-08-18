@@ -141,16 +141,22 @@ export interface WidgetOptions {
 }
 
 /**
- * Last.fm usernames are letters, digits, `-` and `_`, and must start with a
- * letter or `_`. We validate rather than sanitise: an invalid username can
- * never reach the upstream API, which keeps this endpoint from being used as a
- * general-purpose probe. (URL construction uses URLSearchParams, so injection
- * is not possible regardless - this is about limiting the request surface.)
- *
- * Last.fm caps signups at 15 characters, but older accounts exceed that, so
- * the bound here is deliberately looser than the signup rule.
+ * Last.fm's current signup rules do not describe legacy accounts, whose names
+ * can be one character or contain otherwise-disallowed punctuation. Treat the
+ * username as opaque: URLSearchParams handles encoding, while this check only
+ * bounds request/cache keys and rejects non-printable input.
  */
-const USERNAME_RE = /^[a-zA-Z_][a-zA-Z0-9_-]{1,29}$/;
+const USERNAME_MAX_LENGTH = 100;
+const USERNAME_CONTROL_RE = /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/;
+
+function isValidUsername(user: string): boolean {
+  const length = [...user].length;
+  return (
+    length > 0 &&
+    length <= USERNAME_MAX_LENGTH &&
+    !USERNAME_CONTROL_RE.test(user)
+  );
+}
 
 export class OptionsError extends Error {
   constructor(message: string) {
@@ -189,7 +195,7 @@ export function parseOptions(params: URLSearchParams): WidgetOptions {
   if (!user) {
     throw new OptionsError('Missing "user" parameter');
   }
-  if (!USERNAME_RE.test(user)) {
+  if (!isValidUsername(user)) {
     throw new OptionsError('Invalid Last.fm username');
   }
 

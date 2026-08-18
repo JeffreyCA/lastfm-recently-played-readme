@@ -1,4 +1,4 @@
-import { SELF } from 'cloudflare:test';
+import { exports } from 'cloudflare:workers';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -9,7 +9,8 @@ describe('worker', () => {
   it('answers failures with an SVG at HTTP 200, plus a short TTL and an ETag', async () => {
     // A 4xx would make GitHub show a generic broken-image icon with no
     // explanation, and would poison Camo's cache with the failure.
-    const res = await SELF.fetch('https://example.com/svg?user=not%20valid');
+    const user = 'x'.repeat(101);
+    const res = await exports.default.fetch(`https://example.com/svg?user=${user}`);
 
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toBe('image/svg+xml; charset=utf-8');

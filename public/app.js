@@ -6,7 +6,15 @@
  * so a framework and a bundler would be pure overhead.
  */
 
-const USERNAME_RE = /^[a-zA-Z_][a-zA-Z0-9_-]{1,29}$/;
+/** Mirrors isValidUsername on the server; legacy Last.fm names vary widely. */
+const USERNAME_MAX_LENGTH = 100;
+const USERNAME_CONTROL_RE = /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/;
+
+function isValidUsername(user) {
+  const length = [...user].length;
+  return length > 0 && length <= USERNAME_MAX_LENGTH && !USERNAME_CONTROL_RE.test(user);
+}
+
 /** Mirrors parseHexColor on the server: hex digits only, no leading hash. */
 const HEX_RE = /^([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
@@ -523,7 +531,7 @@ function render() {
   out.width.textContent = String(state.width);
   out.radius.textContent = String(state.radius);
 
-  const valid = USERNAME_RE.test(state.user);
+  const valid = isValidUsername(state.user);
   const empty = state.user === '';
 
   controls.user.setAttribute('aria-invalid', String(!empty && !valid));
