@@ -152,6 +152,10 @@ describe('untrusted input', () => {
     expect(parseOptions(new URLSearchParams('user=rj&count=999')).count).toBe(10);
   });
 
+  it('accepts usernames that start with an underscore', () => {
+    expect(parseOptions(new URLSearchParams('user=_usr_')).user).toBe('_usr_');
+  });
+
   it('only accepts strict hex colors for the background', () => {
     for (const [input, expected] of [
       ['1a2b3c', '#1a2b3c'],

@@ -142,15 +142,15 @@ export interface WidgetOptions {
 
 /**
  * Last.fm usernames are letters, digits, `-` and `_`, and must start with a
- * letter. We validate rather than sanitise: an invalid username can never
- * reach the upstream API, which keeps this endpoint from being used as a
+ * letter or `_`. We validate rather than sanitise: an invalid username can
+ * never reach the upstream API, which keeps this endpoint from being used as a
  * general-purpose probe. (URL construction uses URLSearchParams, so injection
  * is not possible regardless - this is about limiting the request surface.)
  *
  * Last.fm caps signups at 15 characters, but older accounts exceed that, so
  * the bound here is deliberately looser than the signup rule.
  */
-const USERNAME_RE = /^[a-zA-Z][a-zA-Z0-9_-]{1,29}$/;
+const USERNAME_RE = /^[a-zA-Z_][a-zA-Z0-9_-]{1,29}$/;
 
 export class OptionsError extends Error {
   constructor(message: string) {
