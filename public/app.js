@@ -6,7 +6,7 @@
  * so a framework and a bundler would be pure overhead.
  */
 
-const USERNAME_RE = /^[a-zA-Z][a-zA-Z0-9_-]{1,29}$/;
+const USERNAME_RE = /^[a-zA-Z_][a-zA-Z0-9_-]{1,29}$/;
 /** Mirrors parseHexColor on the server: hex digits only, no leading hash. */
 const HEX_RE = /^([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
