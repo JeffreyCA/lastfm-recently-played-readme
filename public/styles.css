@@ -7,6 +7,7 @@
   --muted: #9198a1;
   --faint: #6e7681;
   --accent: #d51007;
+  --info: #58a6ff;
   color-scheme: dark;
 }
 
@@ -109,6 +110,34 @@ header p {
 
 main {
   padding: 24px 0 48px;
+}
+
+/*
+ * Kept in step with the notice styles in spotify-recently-played-readme, which
+ * also carries an amber variant for its token expiry warning. Only the blue
+ * informational variant is used here, so only that one is defined.
+ */
+.notice {
+  padding: 10px 12px;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* Standalone notices sit above the form and carry their own gap down to it. */
+main > .notice {
+  margin: 0 0 24px;
+}
+
+.notice a {
+  color: inherit;
+  font-weight: 600;
+}
+
+.notice-info {
+  color: var(--info);
+  background: #58a6ff18;
+  border-color: #58a6ff40;
 }
 
 /* The widget is the only card on the page; everything else is plain sections
