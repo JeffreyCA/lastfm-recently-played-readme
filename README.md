@@ -9,10 +9,10 @@ Check out [spotify-recently-played-readme](https://github.com/JeffreyCA/spotify-
 <a href="https://lastfm-recently-played.jeffreyca.workers.dev"><img alt="Try the interactive configurator" height="36" src="https://img.shields.io/badge/Try_the_interactive_configurator-D51007?style=for-the-badge&logo=lastdotfm&logoColor=white"></a>
 <a href="https://deploy.workers.cloudflare.com/?url=https://github.com/JeffreyCA/lastfm-recently-played-readme"><img alt="Deploy to Cloudflare" height="36" src="https://deploy.workers.cloudflare.com/button"></a>
 
----
-
 > [!NOTE]
 > **2026-08-16**: This project is now hosted on [Cloudflare Workers](https://www.cloudflare.com/products/workers/) for cost reasons. The old Vercel endpoint will continue to work, but it's recommended to switch to the new `workers.dev` address (see below).
+
+---
 
 ## Getting started
 
