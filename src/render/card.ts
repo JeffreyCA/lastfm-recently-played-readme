@@ -150,7 +150,9 @@ const EQ_BAR_GAP = 2;
 const EQ_H = 11;
 const EQ_WIDTH = EQ_BARS * (EQ_BAR_W + EQ_BAR_GAP) - EQ_BAR_GAP;
 /** Space between the equaliser and the "Scrobbling now" label. */
-const EQ_TEXT_GAP = 6;
+const EQ_TEXT_GAP = 5;
+/** Midpoint between the measured Windows-like and macOS status-label widths. */
+const NOW_PLAYING_WIDTH_SCALE = 1.04;
 
 /** Art is fetched at this display size; exported so the fetcher stays in sync. */
 export const ART_DISPLAY_PX = ART_SIZE;
@@ -687,7 +689,7 @@ function renderRow(
 
   if (track.nowPlaying) {
     const label = 'Scrobbling now';
-    const labelWidth = estimateLayoutWidth(label, META_SIZE);
+    const labelWidth = estimateWidth(label, META_SIZE) * NOW_PLAYING_WIDTH_SCALE;
     metaWidth = EQ_WIDTH + EQ_TEXT_GAP + labelWidth;
     metaSvg =
       equaliser(rightEdge - metaWidth, metaBaseline, theme.accent, idPrefix) +
@@ -695,6 +697,7 @@ function renderRow(
         size: META_SIZE,
         fill: theme.accent,
         anchor: 'end',
+        textLength: labelWidth,
       });
   } else if (options.time && track.playedAt !== null) {
     const label = relativeTime(track.playedAt, now);
