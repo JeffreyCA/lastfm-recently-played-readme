@@ -15,7 +15,11 @@ import {
   logoWidth,
   vinylPlaceholder,
 } from './icons';
-import { estimateWidth, truncateToWidth } from './measure';
+import {
+  estimateLayoutWidth,
+  estimateWidth,
+  truncateToWidth,
+} from './measure';
 import { resolveTheme, type Theme } from './themes';
 
 /* -------------------------------------------------------------------------- */
@@ -124,6 +128,8 @@ const STATS_COL_GAP = 22;
 const STATS_LINE_GAP = 18;
 /** Stats belong to the header block, so they sit closer than a section break. */
 const STATS_TOP_GAP = 10;
+/** Uppercase San Francisco labels are wider than the general font allowance. */
+const STATS_LABEL_WIDTH_ALLOWANCE = 1.18;
 
 /** One-line variant: value then label, repeated, centred. */
 const COMPACT_VALUE_SIZE = 13;
@@ -144,7 +150,9 @@ const EQ_BAR_GAP = 2;
 const EQ_H = 11;
 const EQ_WIDTH = EQ_BARS * (EQ_BAR_W + EQ_BAR_GAP) - EQ_BAR_GAP;
 /** Space between the equaliser and the "Scrobbling now" label. */
-const EQ_TEXT_GAP = 6;
+const EQ_TEXT_GAP = 5;
+/** Midpoint between the measured Windows-like and macOS status-label widths. */
+const NOW_PLAYING_WIDTH_SCALE = 1.04;
 
 /** Art is fetched at this display size; exported so the fetcher stays in sync. */
 export const ART_DISPLAY_PX = ART_SIZE;
@@ -489,17 +497,17 @@ function renderHeader(ctx: Ctx, baseline: number, avatarImage: string | null): s
   }
 
   const available = rightEdge - titleX - rightUsed - 12;
+  const headerTitle = truncateToWidth('Recently Played', HEADER_TITLE_SIZE, available, 600);
   parts.push(
-    text(
-      truncateToWidth('Recently Played', HEADER_TITLE_SIZE, available, 600),
-      titleX,
-      baseline,
-      {
-        size: HEADER_TITLE_SIZE,
-        weight: 600,
-        fill: theme.title,
-      },
-    ),
+    text(headerTitle, titleX, baseline, {
+      size: HEADER_TITLE_SIZE,
+      weight: 600,
+      fill: theme.title,
+      textLength:
+        headerTitle !== 'Recently Played'
+          ? estimateWidth(headerTitle, HEADER_TITLE_SIZE, 600)
+          : undefined,
+    }),
   );
 
   return parts.join('');
@@ -519,9 +527,10 @@ interface Section {
 const EMPTY_SECTION: Section = { svg: '', height: 0 };
 
 /** Width a letter-spaced stats label occupies. */
-function labelWidth(label: string): number {
+function labelWidth(label: string, size: number, weight: number): number {
   return (
-    estimateWidth(label, STATS_LABEL_SIZE, 500) + STATS_TRACKING * Math.max(0, label.length - 1)
+    estimateWidth(label, size, weight) * STATS_LABEL_WIDTH_ALLOWANCE +
+    STATS_TRACKING * Math.max(0, label.length - 1)
   );
 }
 
@@ -554,9 +563,11 @@ function renderStats(
 
   // Column widths are needed up front so the group can be centred as a unit,
   // rather than each column being centred in its own share of the card.
-  const widths = columns.map((col) =>
-    Math.max(labelWidth(col.label), estimateWidth(col.value, STATS_VALUE_SIZE, 600)),
+  const labelWidths = columns.map((col) => labelWidth(col.label, STATS_LABEL_SIZE, 500));
+  const valueWidths = columns.map((col) =>
+    estimateLayoutWidth(col.value, STATS_VALUE_SIZE, 600),
   );
+  const widths = columns.map((_, i) => Math.max(labelWidths[i]!, valueWidths[i]!));
   const { count, total } = fitItems(widths, ctx.width - PAD_X * 2, STATS_COL_GAP);
   if (count === 0) return EMPTY_SECTION;
 
@@ -598,11 +609,11 @@ function renderStatsCompact(ctx: Ctx, top: number, user: UserInfo | null | undef
   const height = (CAP_RATIO + DESC_RATIO) * COMPACT_VALUE_SIZE;
 
   const columns = statColumns(user);
-  const valueWidths = columns.map((col) => estimateWidth(col.value, COMPACT_VALUE_SIZE, 600));
-  const labelWidths = columns.map(
-    (col) =>
-      estimateWidth(col.label, COMPACT_LABEL_SIZE, 600) +
-      STATS_TRACKING * Math.max(0, col.label.length - 1),
+  const valueWidths = columns.map((col) =>
+    estimateLayoutWidth(col.value, COMPACT_VALUE_SIZE, 600),
+  );
+  const labelWidths = columns.map((col) =>
+    labelWidth(col.label, COMPACT_LABEL_SIZE, 600),
   );
   const pairWidths = columns.map((_, i) => valueWidths[i]! + COMPACT_PAIR_GAP + labelWidths[i]!);
 
@@ -678,17 +689,19 @@ function renderRow(
 
   if (track.nowPlaying) {
     const label = 'Scrobbling now';
-    metaWidth = EQ_WIDTH + EQ_TEXT_GAP + estimateWidth(label, META_SIZE);
+    const labelWidth = estimateWidth(label, META_SIZE) * NOW_PLAYING_WIDTH_SCALE;
+    metaWidth = EQ_WIDTH + EQ_TEXT_GAP + labelWidth;
     metaSvg =
       equaliser(rightEdge - metaWidth, metaBaseline, theme.accent, idPrefix) +
       text(label, rightEdge, metaBaseline, {
         size: META_SIZE,
         fill: theme.accent,
         anchor: 'end',
+        textLength: labelWidth,
       });
   } else if (options.time && track.playedAt !== null) {
     const label = relativeTime(track.playedAt, now);
-    metaWidth = estimateWidth(label, META_SIZE);
+    metaWidth = estimateLayoutWidth(label, META_SIZE);
     metaSvg = text(label, rightEdge, metaBaseline, {
       size: META_SIZE,
       fill: theme.meta,
@@ -719,13 +732,11 @@ function renderRow(
   const titleHeart = mode === 'title' && track.loved;
   const titleReserve = titleHeart ? HEART_SIZE + HEART_TITLE_GAP : 0;
 
-  const title = truncateToWidth(
-    track.name,
-    TITLE_SIZE,
-    rightEdge - textX - metaReserve - titleReserve,
-    600,
-  );
+  const titleMaxWidth = rightEdge - textX - metaReserve - titleReserve;
+  const title = truncateToWidth(track.name, TITLE_SIZE, titleMaxWidth, 600);
+  const titleWidth = estimateWidth(title, TITLE_SIZE, 600);
   const artist = truncateToWidth(track.artist, ARTIST_SIZE, rightEdge - textX - metaReserve);
+  const artistWidth = estimateWidth(artist, ARTIST_SIZE);
 
   // The title links where the SVG is interactive (direct view, <object>,
   // inline). GitHub embeds it through an <img>, which is inert - the link is
@@ -736,6 +747,7 @@ function renderRow(
     weight: 600,
     fill: theme.title,
     className: `${idPrefix}-t`,
+    textLength: titleHeart || title !== track.name ? titleWidth : undefined,
     tooltip,
   });
   const href = safeTrackUrl(track.url);
@@ -747,13 +759,14 @@ function renderRow(
       fill: theme.artist,
       // The artist line is truncated on the same terms as the title, so it
       // gets the same description rather than a shorter one.
+      textLength: artist !== track.artist ? artistWidth : undefined,
       tooltip,
     }),
     metaSvg,
   );
 
   if (titleHeart) {
-    const cx = textX + estimateWidth(title, TITLE_SIZE, 600) + HEART_TITLE_GAP + HEART_SIZE / 2;
+    const cx = textX + titleWidth + HEART_TITLE_GAP + HEART_SIZE / 2;
     parts.push(heart(cx, capCentre(titleBaseline, TITLE_SIZE), HEART_SIZE, theme.loved));
   }
 

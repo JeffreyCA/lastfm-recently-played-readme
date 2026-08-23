@@ -1,7 +1,7 @@
 import { LIMITS } from '../options';
 import { escapeCss, escapeXml } from './escape';
 import { FONT_STACK } from './font';
-import { truncateToWidth } from './measure';
+import { estimateWidth, truncateToWidth } from './measure';
 import { resolveTheme } from './themes';
 
 export interface ErrorCardInput {
@@ -31,8 +31,16 @@ export function renderErrorCard({
   const height = hint ? 76 : 58;
   const maxTextWidth = width - 32 - 26;
 
-  const title = truncateToWidth(message, 13, maxTextWidth);
+  const title = truncateToWidth(message, 13, maxTextWidth, 600);
   const sub = hint ? truncateToWidth(hint, 11, maxTextWidth) : '';
+  const titleLength =
+    title !== message
+      ? ` textLength="${estimateWidth(title, 13, 600).toFixed(2)}" lengthAdjust="spacing"`
+      : '';
+  const subLength =
+    hint && sub !== hint
+      ? ` textLength="${estimateWidth(sub, 11).toFixed(2)}" lengthAdjust="spacing"`
+      : '';
 
   const background =
     theme.bg === 'none'
@@ -46,9 +54,9 @@ export function renderErrorCard({
 
   const titleY = hint ? 30 : 33;
   const body =
-    `<text x="46" y="${titleY}" font-family="${FONT_STACK}" font-size="13" font-weight="600" fill="${theme.title}">${escapeXml(title)}</text>` +
+    `<text x="46" y="${titleY}" font-family="${FONT_STACK}" font-size="13" font-weight="600"${titleLength} fill="${theme.title}">${escapeXml(title)}</text>` +
     (hint
-      ? `<text x="46" y="48" font-family="${FONT_STACK}" font-size="11" fill="${theme.meta}">${escapeXml(sub)}</text>`
+      ? `<text x="46" y="48" font-family="${FONT_STACK}" font-size="11"${subLength} fill="${theme.meta}">${escapeXml(sub)}</text>`
       : '');
 
   const alt = hint ? `${message}. ${hint}` : message;
