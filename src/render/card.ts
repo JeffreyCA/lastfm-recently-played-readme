@@ -18,7 +18,6 @@ import {
 import {
   estimateLayoutWidth,
   estimateWidth,
-  truncateToLayoutWidth,
   truncateToWidth,
 } from './measure';
 import { resolveTheme, type Theme } from './themes';
@@ -496,12 +495,16 @@ function renderHeader(ctx: Ctx, baseline: number, avatarImage: string | null): s
   }
 
   const available = rightEdge - titleX - rightUsed - 12;
-  const headerTitle = truncateToLayoutWidth('Recently Played', HEADER_TITLE_SIZE, available, 600);
+  const headerTitle = truncateToWidth('Recently Played', HEADER_TITLE_SIZE, available, 600);
   parts.push(
     text(headerTitle, titleX, baseline, {
       size: HEADER_TITLE_SIZE,
       weight: 600,
       fill: theme.title,
+      textLength:
+        headerTitle !== 'Recently Played'
+          ? estimateWidth(headerTitle, HEADER_TITLE_SIZE, 600)
+          : undefined,
     }),
   );
 
@@ -727,15 +730,10 @@ function renderRow(
   const titleReserve = titleHeart ? HEART_SIZE + HEART_TITLE_GAP : 0;
 
   const titleMaxWidth = rightEdge - textX - metaReserve - titleReserve;
-  const title = titleHeart
-    ? truncateToWidth(track.name, TITLE_SIZE, titleMaxWidth, 600)
-    : truncateToLayoutWidth(track.name, TITLE_SIZE, titleMaxWidth, 600);
+  const title = truncateToWidth(track.name, TITLE_SIZE, titleMaxWidth, 600);
   const titleWidth = estimateWidth(title, TITLE_SIZE, 600);
-  const artist = truncateToLayoutWidth(
-    track.artist,
-    ARTIST_SIZE,
-    rightEdge - textX - metaReserve,
-  );
+  const artist = truncateToWidth(track.artist, ARTIST_SIZE, rightEdge - textX - metaReserve);
+  const artistWidth = estimateWidth(artist, ARTIST_SIZE);
 
   // The title links where the SVG is interactive (direct view, <object>,
   // inline). GitHub embeds it through an <img>, which is inert - the link is
@@ -746,7 +744,7 @@ function renderRow(
     weight: 600,
     fill: theme.title,
     className: `${idPrefix}-t`,
-    textLength: titleHeart ? titleWidth : undefined,
+    textLength: titleHeart || title !== track.name ? titleWidth : undefined,
     tooltip,
   });
   const href = safeTrackUrl(track.url);
@@ -758,6 +756,7 @@ function renderRow(
       fill: theme.artist,
       // The artist line is truncated on the same terms as the title, so it
       // gets the same description rather than a shorter one.
+      textLength: artist !== track.artist ? artistWidth : undefined,
       tooltip,
     }),
     metaSvg,
